@@ -5,7 +5,9 @@ Class {
 		'numberOfClusters',
 		'centroids',
 		'clusters',
-		'previousCentroids'
+		'centroidsHistory',
+		'clustersHistory',
+		'scoresHistory'
 	],
 	#category : #KMeans
 }
@@ -17,11 +19,12 @@ KMeans class >> numberOfClusters: anInteger [
 
 { #category : #training }
 KMeans >> assignmentStep: aCollectionOfPoints [ 
+	"Assign clusters to each point. We choose the cluster whose centroid minimizes has the shortest distance to the point"
 	| distances |
 	
-	self clusters: (aCollectionOfPoints collect: [ :each | 
+	self clusters: (aCollectionOfPoints collect: [ :point | 
 		distances := self centroids collect: [ :centroid | 
-			each euclideanDistance: centroid ].
+			self distanceBetween: point and: centroid ].
 		
 		distances indexOf: distances min ]).
 ]
@@ -37,6 +40,11 @@ KMeans >> centroids: anObject [
 ]
 
 { #category : #accessing }
+KMeans >> centroidsHistory [
+	^ centroidsHistory
+]
+
+{ #category : #accessing }
 KMeans >> clusters [
 	^ clusters
 ]
@@ -46,23 +54,50 @@ KMeans >> clusters: anObject [
 	clusters := anObject
 ]
 
+{ #category : #accessing }
+KMeans >> clustersHistory [
+	^ clustersHistory
+]
+
+{ #category : #training }
+KMeans >> distanceBetween: firstPoint and: secondPoint [
+	"Euclidean distance between two points"
+	^ ((firstPoint - secondPoint) raisedTo: 2) sum sqrt
+]
+
 { #category : #training }
 KMeans >> fit: aCollectionOfPoints [
 	"Each point is an n-dimensional vector (collection of values)"
 	self initializeCentroids: aCollectionOfPoints.
-	self hasConverged whileFalse: [ self step: aCollectionOfPoints ].
+	self initializeHistories.
+	
+	"We must run it at least twice"
+	2 timesRepeat: [
+		self step: aCollectionOfPoints ].
+	
+	[ self hasConverged ] whileFalse: [
+		self step: aCollectionOfPoints ].
 ]
 
 { #category : #training }
 KMeans >> hasConverged [
-	^ ((self centroids closeTo: previousCentroids) includes: false) not.
+	| currentCentroids previousCentroids |
+	currentCentroids := self centroidsHistory last.
+	previousCentroids := self centroidsHistory at: (self centroidsHistory size - 1).
+	^ ((currentCentroids closeTo: previousCentroids) includes: false) not.
 ]
 
 { #category : #training }
 KMeans >> initializeCentroids: aCollectionOfPoints [
+	"Choose k points as centroids"
 	self centroids: (aCollectionOfPoints copyFrom: 1 to: self numberOfClusters).
-	"must be different from centroids"
-	previousCentroids := self centroids + 1.
+]
+
+{ #category : #training }
+KMeans >> initializeHistories [
+	centroidsHistory := OrderedCollection new.
+	clustersHistory := OrderedCollection new.
+	scoresHistory := OrderedCollection new.
 ]
 
 { #category : #accessing }
@@ -85,16 +120,30 @@ KMeans >> score: aCollectionOfPoints [
 		point euclideanDistance: centroid ]) sum
 ]
 
+{ #category : #accessing }
+KMeans >> scoresHistory [
+	^ scoresHistory
+]
+
 { #category : #training }
 KMeans >> step: aCollectionOfPoints [
 	self assignmentStep: aCollectionOfPoints.
 	self updateStep: aCollectionOfPoints.
+	self updateHistory: aCollectionOfPoints.
+]
+
+{ #category : #training }
+KMeans >> updateHistory: aCollectionOfPoints [ 
+	"Save clusters, centroids, and score to the history"
+	self clustersHistory add: self clusters copy.
+	self centroidsHistory add: self centroids copy.
+	self scoresHistory add: (self score: aCollectionOfPoints).
 ]
 
 { #category : #training }
 KMeans >> updateStep: aCollectionOfPoints [
+	"Update centroids by moving them to the center of each cluster (mean of all points in the cluster)"
 	| pointsOfThisCentroid |
-	previousCentroids := self centroids copy.
 	
 	self centroids: (self centroids withIndexCollect: [ :centroid :centroidIndex |
 		pointsOfThisCentroid := (1 to: aCollectionOfPoints size)
