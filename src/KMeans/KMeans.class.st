@@ -44,6 +44,20 @@ KMeans >> centroidsHistory [
 	^ centroidsHistory
 ]
 
+{ #category : #training }
+KMeans >> chooseRandomCentroid: aCollectionOfPoints [
+	"Choose a random point as centroids"
+	| rand xMax xMin yMax yMin |
+	
+	xMax := (aCollectionOfPoints collect: #first) max.
+	xMin := (aCollectionOfPoints collect: #first) min.
+	yMax := (aCollectionOfPoints collect: #second) max.
+	yMin := (aCollectionOfPoints collect: #second) min.
+	
+	rand := Random new.
+	^ { (rand nextBetween: xMin and: xMax) . (rand nextBetween: yMin and: yMax ) } asPMVector
+]
+
 { #category : #accessing }
 KMeans >> clusters [
 	^ clusters
@@ -84,13 +98,14 @@ KMeans >> hasConverged [
 	| currentCentroids previousCentroids |
 	currentCentroids := self centroidsHistory last.
 	previousCentroids := self centroidsHistory at: (self centroidsHistory size - 1).
-	^ ((currentCentroids closeTo: previousCentroids) includes: false) not.
+	^ (currentCentroids closeTo: previousCentroids) not.
 ]
 
 { #category : #training }
 KMeans >> initializeCentroids: aCollectionOfPoints [
 	"Choose k points as centroids"
-	self centroids: (aCollectionOfPoints copyFrom: 1 to: self numberOfClusters).
+	self centroids: ((1 to: self numberOfClusters) collect: [ :i | 
+		self chooseRandomCentroid: aCollectionOfPoints  ])
 ]
 
 { #category : #training }
@@ -151,5 +166,7 @@ KMeans >> updateStep: aCollectionOfPoints [
 				(self clusters at: pointIndex) = centroidIndex ]
 			thenCollect: [ :pointIndex | aCollectionOfPoints at: pointIndex ].
 			
-		1.0 / pointsOfThisCentroid size * pointsOfThisCentroid sum ]).
+		pointsOfThisCentroid isEmpty
+			ifTrue: [ self chooseRandomCentroid: aCollectionOfPoints ]
+			ifFalse: [ 1.0 / pointsOfThisCentroid size * pointsOfThisCentroid sum ] ]).
 ]
