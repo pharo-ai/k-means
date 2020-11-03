@@ -47,15 +47,16 @@ KMeans >> centroidsHistory [
 { #category : #training }
 KMeans >> chooseRandomCentroid: aCollectionOfPoints [
 	"Choose a random point as centroids"
-	| rand xMax xMin yMax yMin |
+	| rand axis min max |
 	
-	xMax := (aCollectionOfPoints collect: #first) max.
-	xMin := (aCollectionOfPoints collect: #first) min.
-	yMax := (aCollectionOfPoints collect: #second) max.
-	yMin := (aCollectionOfPoints collect: #second) min.
+	^ (1 to: aCollectionOfPoints first size) collect: [ :i |
+		axis := aCollectionOfPoints collect: [ :point | point at: i ].
 	
-	rand := Random new.
-	^ { (rand nextBetween: xMin and: xMax) . (rand nextBetween: yMin and: yMax ) } asPMVector
+		min := axis min.
+		max := axis max.
+	
+		rand := Random new.
+		rand nextBetween: min and: max ]
 ]
 
 { #category : #accessing }
@@ -132,7 +133,7 @@ KMeans >> score: aCollectionOfPoints [
 	^ ((1 to: aCollectionOfPoints size) collect: [ :index |
 		point := aCollectionOfPoints at: index.
 		centroid := self centroids at: (self clusters at: index).
-		point euclideanDistance: centroid ]) sum
+		self distanceBetween: point and: centroid ]) sum
 ]
 
 { #category : #accessing }
