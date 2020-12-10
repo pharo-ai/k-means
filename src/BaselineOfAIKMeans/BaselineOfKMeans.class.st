@@ -10,5 +10,5 @@ BaselineOfKMeans >> baseline: spec [
 	spec for: #common do: [	
 		"Packages"
 		spec 
-			package: 'KMeans' ].
+			package: 'AI-KMeans' ].
 ]
