@@ -20,7 +20,7 @@ Metacello new
 
 ## How to depend on it?
 
-If you want to add a dependency on KMeans to your project, include the following lines into your baseline method:
+If you want to add a dependency on k-means to your project, include the following lines into your baseline method:
 
 ```Smalltalk
 spec
