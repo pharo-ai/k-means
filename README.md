@@ -1,4 +1,4 @@
-# KMeans
+# k-means
 
 [![Build Status](https://travis-ci.org/pharo-ai/KMeans.svg?branch=master)](https://travis-ci.org/pharo-ai/KMeans)
 [![Build status](https://ci.appveyor.com/api/projects/status/4ml4ge67idyjfhqv?svg=true)](https://ci.appveyor.com/project/olekscode/kmeans)
@@ -9,12 +9,12 @@ K-means clustering in Pharo
 
 ## How to install it?
 
-To install KMeans, go to the Playground (Ctrl+OW) in your [Pharo](https://pharo.org/) image and execute the following Metacello script (select it and press Do-it button or Ctrl+D):
+To install k-means, go to the Playground (Ctrl+OW) in your [Pharo](https://pharo.org/) image and execute the following Metacello script (select it and press Do-it button or Ctrl+D):
 
 ```Smalltalk
 Metacello new
-  baseline: 'KMeans';
-  repository: 'github://pharo-ai/KMeans/src';
+  baseline: 'AIKMeans';
+  repository: 'github://pharo-ai/k-means/src';
   load.
 ```
 
@@ -24,8 +24,8 @@ If you want to add a dependency on KMeans to your project, include the following
 
 ```Smalltalk
 spec
-  baseline: 'KMeans'
-  with: [ spec repository: 'github://pharo-ai/KMeans/src' ].
+  baseline: 'AIKMeans'
+  with: [ spec repository: 'github://pharo-ai/k-means/src' ].
 ```
 
 If you are new to baselines and Metacello, check out the [Baselines](https://github.com/pharo-open-documentation/pharo-wiki/blob/master/General/Baselines.md) tutorial on Pharo Wiki.
