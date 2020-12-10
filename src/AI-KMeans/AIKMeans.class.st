@@ -1,5 +1,5 @@
 Class {
-	#name : #MLKMeans,
+	#name : #AIKMeans,
 	#superclass : #Object,
 	#instVars : [
 		'numberOfClusters',
@@ -9,16 +9,16 @@ Class {
 		'clustersHistory',
 		'scoresHistory'
 	],
-	#category : #KMeans
+	#category : #'AI-KMeans'
 }
 
 { #category : #'as yet unclassified' }
-MLKMeans class >> numberOfClusters: anInteger [
+AIKMeans class >> numberOfClusters: anInteger [
 	^ self new numberOfClusters: anInteger; yourself
 ]
 
 { #category : #training }
-MLKMeans >> assignmentStep: aCollectionOfPoints [ 
+AIKMeans >> assignmentStep: aCollectionOfPoints [ 
 	"Assign clusters to each point. We choose the cluster whose centroid minimizes has the shortest distance to the point"
 	| distances |
 	
@@ -30,22 +30,22 @@ MLKMeans >> assignmentStep: aCollectionOfPoints [
 ]
 
 { #category : #accessing }
-MLKMeans >> centroids [
+AIKMeans >> centroids [
 	^ centroids
 ]
 
 { #category : #accessing }
-MLKMeans >> centroids: anObject [
+AIKMeans >> centroids: anObject [
 	centroids := anObject
 ]
 
 { #category : #accessing }
-MLKMeans >> centroidsHistory [
+AIKMeans >> centroidsHistory [
 	^ centroidsHistory
 ]
 
 { #category : #training }
-MLKMeans >> chooseRandomCentroid: aCollectionOfPoints [
+AIKMeans >> chooseRandomCentroid: aCollectionOfPoints [
 	"Choose a random point as centroids"
 	| rand axis min max |
 	
@@ -60,28 +60,28 @@ MLKMeans >> chooseRandomCentroid: aCollectionOfPoints [
 ]
 
 { #category : #accessing }
-MLKMeans >> clusters [
+AIKMeans >> clusters [
 	^ clusters
 ]
 
 { #category : #accessing }
-MLKMeans >> clusters: anObject [
+AIKMeans >> clusters: anObject [
 	clusters := anObject
 ]
 
 { #category : #accessing }
-MLKMeans >> clustersHistory [
+AIKMeans >> clustersHistory [
 	^ clustersHistory
 ]
 
 { #category : #training }
-MLKMeans >> distanceBetween: firstPoint and: secondPoint [
+AIKMeans >> distanceBetween: firstPoint and: secondPoint [
 	"Euclidean distance between two points"
 	^ ((firstPoint - secondPoint) raisedTo: 2) sum sqrt
 ]
 
 { #category : #training }
-MLKMeans >> fit: aCollectionOfPoints [
+AIKMeans >> fit: aCollectionOfPoints [
 	"Each point is an n-dimensional vector (collection of values)"
 	self initializeCentroids: aCollectionOfPoints.
 	self initializeHistories.
@@ -95,7 +95,7 @@ MLKMeans >> fit: aCollectionOfPoints [
 ]
 
 { #category : #training }
-MLKMeans >> hasConverged [
+AIKMeans >> hasConverged [
 	| currentCentroids previousCentroids |
 	currentCentroids := self centroidsHistory last.
 	previousCentroids := self centroidsHistory at: (self centroidsHistory size - 1).
@@ -103,31 +103,31 @@ MLKMeans >> hasConverged [
 ]
 
 { #category : #initialization }
-MLKMeans >> initializeCentroids: aCollectionOfPoints [
+AIKMeans >> initializeCentroids: aCollectionOfPoints [
 	"Choose k points as centroids"
 	self centroids: ((1 to: self numberOfClusters) collect: [ :i | 
 		self chooseRandomCentroid: aCollectionOfPoints  ])
 ]
 
 { #category : #initialization }
-MLKMeans >> initializeHistories [
+AIKMeans >> initializeHistories [
 	centroidsHistory := OrderedCollection new.
 	clustersHistory := OrderedCollection new.
 	scoresHistory := OrderedCollection new.
 ]
 
 { #category : #accessing }
-MLKMeans >> numberOfClusters [
+AIKMeans >> numberOfClusters [
 	^ numberOfClusters
 ]
 
 { #category : #accessing }
-MLKMeans >> numberOfClusters: anObject [
+AIKMeans >> numberOfClusters: anObject [
 	numberOfClusters := anObject
 ]
 
 { #category : #evaluation }
-MLKMeans >> score: aCollectionOfPoints [ 
+AIKMeans >> score: aCollectionOfPoints [ 
 	| point centroid |
 	
 	^ ((1 to: aCollectionOfPoints size) collect: [ :index |
@@ -137,19 +137,19 @@ MLKMeans >> score: aCollectionOfPoints [
 ]
 
 { #category : #accessing }
-MLKMeans >> scoresHistory [
+AIKMeans >> scoresHistory [
 	^ scoresHistory
 ]
 
 { #category : #training }
-MLKMeans >> step: aCollectionOfPoints [
+AIKMeans >> step: aCollectionOfPoints [
 	self assignmentStep: aCollectionOfPoints.
 	self updateStep: aCollectionOfPoints.
 	self updateHistory: aCollectionOfPoints.
 ]
 
 { #category : #training }
-MLKMeans >> updateHistory: aCollectionOfPoints [ 
+AIKMeans >> updateHistory: aCollectionOfPoints [ 
 	"Save clusters, centroids, and score to the history"
 	self clustersHistory add: self clusters copy.
 	self centroidsHistory add: self centroids copy.
@@ -157,7 +157,7 @@ MLKMeans >> updateHistory: aCollectionOfPoints [
 ]
 
 { #category : #training }
-MLKMeans >> updateStep: aCollectionOfPoints [
+AIKMeans >> updateStep: aCollectionOfPoints [
 	"Update centroids by moving them to the center of each cluster (mean of all points in the cluster)"
 	| pointsOfThisCentroid |
 	

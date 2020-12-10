@@ -1,7 +1,7 @@
 Class {
 	#name : #BaselineOfKMeans,
 	#superclass : #BaselineOf,
-	#category : #BaselineOfKMeans
+	#category : #BaselineOfAIKMeans
 }
 
 { #category : #baselines }
