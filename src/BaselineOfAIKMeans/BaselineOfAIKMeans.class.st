@@ -1,11 +1,11 @@
 Class {
-	#name : #BaselineOfKMeans,
+	#name : #BaselineOfAIKMeans,
 	#superclass : #BaselineOf,
 	#category : #BaselineOfAIKMeans
 }
 
 { #category : #baselines }
-BaselineOfKMeans >> baseline: spec [
+BaselineOfAIKMeans >> baseline: spec [
 	<baseline>
 	spec for: #common do: [	
 		"Packages"
