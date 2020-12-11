@@ -1,14 +1,14 @@
 SmalltalkCISpec {
   #loading : [
     SCIMetacelloLoadSpec {
-      #baseline : 'KMeans',
+      #baseline : 'AIKMeans',
       #directory : 'src',
       #platforms : [ #pharo ]
     }
   ],
   #testing : {
     #coverage : {
-      #packages : [ 'KMeans*' ]
+      #packages : [ 'AI-KMeans*' ]
     }
   }
 }
