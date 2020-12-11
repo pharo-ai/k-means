@@ -49,7 +49,7 @@ AIKMeans >> chooseRandomCentroid: aCollectionOfPoints [
 	"Choose a random point as centroids"
 	| rand axis min max |
 	
-	^ (1 to: aCollectionOfPoints first size) collect: [ :i |
+	^ (1 to: aCollectionOfPoints anyOne size) collect: [ :i |
 		axis := aCollectionOfPoints collect: [ :point | point at: i ].
 	
 		min := axis min.
@@ -99,7 +99,12 @@ AIKMeans >> hasConverged [
 	| currentCentroids previousCentroids |
 	currentCentroids := self centroidsHistory last.
 	previousCentroids := self centroidsHistory at: (self centroidsHistory size - 1).
-	^ (currentCentroids closeTo: previousCentroids) not.
+	
+	1 to: currentCentroids size do: [ :i |
+		((self distanceBetween: (currentCentroids at: i) and: (previousCentroids at: i)) closeTo: 0)
+			ifFalse: [ ^ false ] ].
+		
+	^ true
 ]
 
 { #category : #initialization }
