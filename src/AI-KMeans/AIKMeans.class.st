@@ -82,9 +82,11 @@ AIKMeans >> distanceBetween: firstPoint and: secondPoint [
 
 { #category : #training }
 AIKMeans >> fit: aCollectionOfPoints [
+	self initializeEmptyModel.
+	aCollectionOfPoints ifEmpty: [ ^ self ].
+
 	"Each point is an n-dimensional vector (collection of values)"
 	self initializeCentroids: aCollectionOfPoints.
-	self initializeHistories.
 	
 	"We must run it at least twice"
 	2 timesRepeat: [
@@ -108,6 +110,12 @@ AIKMeans >> hasConverged [
 ]
 
 { #category : #initialization }
+AIKMeans >> initialize [ 
+	super initialize.
+	self initializeEmptyModel.
+]
+
+{ #category : #initialization }
 AIKMeans >> initializeCentroids: aCollectionOfPoints [
 	"Choose k points as centroids"
 	self centroids: ((1 to: self numberOfClusters) collect: [ :i | 
@@ -115,7 +123,10 @@ AIKMeans >> initializeCentroids: aCollectionOfPoints [
 ]
 
 { #category : #initialization }
-AIKMeans >> initializeHistories [
+AIKMeans >> initializeEmptyModel [
+	clusters := OrderedCollection new.
+	centroids := OrderedCollection new.
+	
 	centroidsHistory := OrderedCollection new.
 	clustersHistory := OrderedCollection new.
 	scoresHistory := OrderedCollection new.
