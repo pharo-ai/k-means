@@ -16,5 +16,9 @@ BaselineOfAIKMeans >> baseline: spec [
 		"Packages"
 		spec 
 			package: 'AI-KMeans' with: [ spec requires: #('AINormalization') ];
-			package: 'AI-KMeans-Tests' with: [ spec requires: #('AI-KMeans') ]  ].
+			package: 'AI-KMeans-Tests' with: [ spec requires: #('AI-KMeans') ] ].
+	
+	"Patches for older versions of Pharo"
+	spec for: #'pharo8.x' do: [
+		spec package: 'AI-KMeans-OldPharo' ].
 ]
