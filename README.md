@@ -1,7 +1,7 @@
 # k-means
 
 ![Build status](https://github.com/pharo-ai/k-means/workflows/CI/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/pharo-ai/KMeans/badge.svg?branch=master)](https://coveralls.io/github/pharo-ai/KMeans?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/pharo-ai/k-means/badge.svg?branch=master)](https://coveralls.io/github/pharo-ai/k-means?branch=master)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/pharo-ai/KMeans/master/LICENSE)
 
 K-means clustering in Pharo
