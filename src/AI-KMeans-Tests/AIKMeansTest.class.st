@@ -5,6 +5,21 @@ Class {
 }
 
 { #category : #tests }
+AIKMeansTest >> testDistanceBetweenAnd [
+
+	| kMeans |
+	kMeans := AIKMeans numberOfClusters: 2.
+
+	self
+		assert: (kMeans distanceBetween: #( -3.54 7 ) and: #( -11.64 9.9 ))
+		closeTo: 8.603488.
+
+	self
+		assert: (kMeans distanceBetween: #( -5.1 4 -3.1 ) and: #( 4 5.9 -2.2 ))
+		closeTo: 9.3397
+]
+
+{ #category : #tests }
 AIKMeansTest >> testEmptyDataset [
 	| data expectedClusters kmeans |
 	
