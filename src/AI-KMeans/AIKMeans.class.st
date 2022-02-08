@@ -21,7 +21,7 @@ AIKMeans class >> numberOfClusters: anInteger [
 ]
 
 { #category : #training }
-AIKMeans >> assignmentStep: aCollectionOfPoints [
+AIKMeans >> assignClusterToPoints: aCollectionOfPoints [
 
 	"Assign clusters to each point. We choose the cluster whose centroid minimizes has the shortest distance to the point"
 
@@ -178,23 +178,13 @@ AIKMeans >> scoresHistory [
 { #category : #training }
 AIKMeans >> step: aCollectionOfPoints [
 
-	self assignmentStep: aCollectionOfPoints.
-	self updateStep: aCollectionOfPoints.
+	self assignClusterToPoints: aCollectionOfPoints.
+	self updateCentroids: aCollectionOfPoints.
 	self updateHistory: aCollectionOfPoints.
 ]
 
 { #category : #training }
-AIKMeans >> updateHistory: aCollectionOfPoints [
-
-	"Save clusters, centroids, and score to the history"
-
-	clustersHistory add: clusters.
-	centroidsHistory add: centroids.
-	scoresHistory add: (self score: aCollectionOfPoints)
-]
-
-{ #category : #training }
-AIKMeans >> updateStep: aCollectionOfPoints [
+AIKMeans >> updateCentroids: aCollectionOfPoints [
 
 	"Update centroids by moving them to the center of each cluster (mean of all points in the cluster)"
 	
@@ -208,4 +198,14 @@ AIKMeans >> updateStep: aCollectionOfPoints [
 		pointsOfThisCentroid isEmpty
 			ifTrue: [ self chooseRandomCentroid: aCollectionOfPoints ]
 			ifFalse: [ 1.0 / pointsOfThisCentroid size * pointsOfThisCentroid sum ] ]).
+]
+
+{ #category : #training }
+AIKMeans >> updateHistory: aCollectionOfPoints [
+
+	"Save clusters, centroids, and score to the history"
+
+	clustersHistory add: clusters.
+	centroidsHistory add: centroids.
+	scoresHistory add: (self score: aCollectionOfPoints)
 ]
