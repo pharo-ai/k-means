@@ -63,6 +63,19 @@ AIKMeansTest >> testFourPointsTwoClusters [
 ]
 
 { #category : #tests }
+AIKMeansTest >> testNumberOfCentroidsMatchExpectation [
+
+	| data kmeans clusters |
+	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
+	clusters := 2.
+
+	kmeans := AIKMeans numberOfClusters: clusters.
+	kmeans fit: data.
+
+	self assert: (kmeans centroids size) equals: clusters
+]
+
+{ #category : #tests }
 AIKMeansTest >> testNumberOfClustersCantBeZero [
 
 	| data kmeans |
@@ -70,17 +83,4 @@ AIKMeansTest >> testNumberOfClustersCantBeZero [
 
 	kmeans := AIKMeans numberOfClusters: 0.
 	self should: [ kmeans fit: data ] raise: Error
-]
-
-{ #category : #tests }
-AIKMeansTest >> testNumberOfClustersCentersMatchExpectation [
-
-	| data kmeans nbClusters |
-	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
-	nbClusters := 2.
-
-	kmeans := AIKMeans numberOfClusters: nbClusters.
-	kmeans fit: data.
-
-	self assert: (kmeans centroids size) equals: nbClusters
 ]
