@@ -65,3 +65,44 @@ AIKMeansTest >> testFourPointsTwoClusters [
 	self assert: (possibleClusters includes: kmeans clusters).
 	
 ]
+
+{ #category : #tests }
+AIKMeansTest >> testInconsistentNumberOfClusters [
+
+	| data kmeans |
+	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
+
+	kmeans := AIKMeans numberOfClusters: 'number'.
+	self should: [ kmeans fit: data ] raise: Error
+]
+
+{ #category : #tests }
+AIKMeansTest >> testNumberOfClustersCantBeNegative [
+
+	| data kmeans |
+	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
+
+	kmeans := AIKMeans numberOfClusters: -2.
+	self should: [ kmeans fit: data ] raise: Error
+]
+
+{ #category : #tests }
+AIKMeansTest >> testNumberOfClustersCantBeSuperiorToNbData [
+
+	"| data kmeans |
+	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
+
+	kmeans := AIKMeans numberOfClusters: 5.
+	self should: [ kmeans fit: data ] raise: Error"
+	self skip.
+]
+
+{ #category : #tests }
+AIKMeansTest >> testNumberOfClustersCantBeZero [
+
+	| data kmeans |
+	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
+
+	kmeans := AIKMeans numberOfClusters: 0.
+	self should: [ kmeans fit: data ] raise: Error
+]
