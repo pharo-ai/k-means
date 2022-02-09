@@ -74,13 +74,3 @@ AIKMeansTest >> testNumberOfCentroidsMatchExpectation [
 
 	self assert: (kmeans centroids size) equals: clusters
 ]
-
-{ #category : #tests }
-AIKMeansTest >> testNumberOfClustersCantBeZero [
-
-	| data kmeans |
-	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
-
-	kmeans := AIKMeans numberOfClusters: 0.
-	self should: [ kmeans fit: data ] raise: Error
-]
