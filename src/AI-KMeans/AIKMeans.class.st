@@ -22,7 +22,7 @@ Class {
 { #category : #accessing }
 AIKMeans class >> defaultMaxIterations [
 
-	^ 500
+	^ 300
 ]
 
 { #category : #'instance creation' }
