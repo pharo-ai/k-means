@@ -1,3 +1,8 @@
+"
+K-Means is a clustering, unsupervised machine learning algorithm.
+
+Please refer to the Pharo wiki for more information [Pharo wiki](https://github.com/pharo-ai/wiki)
+"
 Class {
 	#name : #AIKMeans,
 	#superclass : #Object,
@@ -7,10 +12,18 @@ Class {
 		'clusters',
 		'centroidsHistory',
 		'clustersHistory',
-		'scoresHistory'
+		'scoresHistory',
+		'maxIterations',
+		'performedIterations'
 	],
 	#category : #'AI-KMeans'
 }
+
+{ #category : #accessing }
+AIKMeans class >> defaultMaxIterations [
+
+	^ 500
+]
 
 { #category : #'instance creation' }
 AIKMeans class >> numberOfClusters: anInteger [
@@ -97,14 +110,16 @@ AIKMeans >> fit: aCollectionOfPoints [
 AIKMeans >> hasConverged [
 
 	| currentCentroids previousCentroids |
+	
+	(performedIterations >= maxIterations) ifTrue: [ ^ true ].
+
 	currentCentroids := centroidsHistory last.
 	previousCentroids := centroidsHistory nextToLast.
 
 	currentCentroids
 		with: previousCentroids
 		do: [ :current :previous | 
-			((self distanceBetween: current and: previous) closeTo: 0)
-				ifFalse: [ ^ false ] ].
+			((self distanceBetween: current and: previous) closeTo: 0) ifFalse: [ ^ false ] ].
 
 	^ true
 ]
@@ -113,7 +128,8 @@ AIKMeans >> hasConverged [
 AIKMeans >> initialize [
 
 	super initialize.
-	self initializeEmptyModel
+	self initializeEmptyModel.
+	maxIterations := self class defaultMaxIterations
 ]
 
 { #category : #initialization }
@@ -121,8 +137,8 @@ AIKMeans >> initializeCentroids: aCollectionOfPoints [
 
 	"Choose k points as centroids"
 
-	centroids := ((1 to: self numberOfClusters) collect: [ :i | 
-		self chooseRandomCentroid: aCollectionOfPoints ])
+	centroids := (1 to: numberOfClusters) collect: [ :i | 
+		self chooseRandomCentroid: aCollectionOfPoints ]
 ]
 
 { #category : #initialization }
@@ -130,6 +146,8 @@ AIKMeans >> initializeEmptyModel [
 
 	clusters := OrderedCollection new.
 	centroids := OrderedCollection new.
+	
+	performedIterations := 0.
 
 	centroidsHistory := OrderedCollection new.
 	clustersHistory := OrderedCollection new.
@@ -137,16 +155,8 @@ AIKMeans >> initializeEmptyModel [
 ]
 
 { #category : #accessing }
-AIKMeans >> numberOfClusters [
-
-	"Please use this accessor always whenever is necessary to access the numberOfClusters instance variable.
-	It is needed to raise the exception in case that the class has been instantiated without declaring the number of clusters."
-
-	self flag: 'See comment of the method.'.
-
-	numberOfClusters ifNil: [ NumberOfClustersNotSetException signal ].
-
-	^ numberOfClusters
+AIKMeans >> maxIterations: anInteger [ 
+	maxIterations := anInteger
 ]
 
 { #category : #accessing }
@@ -181,6 +191,8 @@ AIKMeans >> step: aCollectionOfPoints [
 	self assignClusterToPoints: aCollectionOfPoints.
 	self updateCentroids: aCollectionOfPoints.
 	self updateHistory: aCollectionOfPoints.
+
+	performedIterations := performedIterations + 1
 ]
 
 { #category : #training }

@@ -35,6 +35,7 @@ AIKMeansTest >> testEmptyDataset [
 
 { #category : #tests }
 AIKMeansTest >> testFittingWithoutSettingNumberOfClusters [
+
 	| data possibleClusters kmeans |
 	
 	data := #((0 0)(0.5 0)(0.5 1)(1 1)).
@@ -45,7 +46,7 @@ AIKMeansTest >> testFittingWithoutSettingNumberOfClusters [
 	
 	kmeans := AIKMeans new.
 	
-	self should: [ kmeans fit: data ] raise: NumberOfClustersNotSetException
+	self should: [ kmeans fit: data ] raise: Error
 	
 ]
 
