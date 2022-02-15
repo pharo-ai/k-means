@@ -14,7 +14,8 @@ Class {
 		'clustersHistory',
 		'scoresHistory',
 		'maxIterations',
-		'performedIterations'
+		'performedIterations',
+		'previousCentroids'
 	],
 	#category : #'AI-KMeans'
 }
@@ -29,8 +30,8 @@ AIKMeans class >> defaultMaxIterations [
 AIKMeans class >> numberOfClusters: anInteger [
 
 	^ self new
-		  numberOfClusters: anInteger;
-		  yourself
+		numberOfClusters: anInteger;
+		yourself
 ]
 
 { #category : #training }
@@ -44,6 +45,12 @@ AIKMeans >> assignClusterToPoints: aCollectionOfPoints [
 		distances := centroids collect: [ :centroid | self distanceBetween: point and: centroid ].
 
 		distances indexOf: distances min ])
+]
+
+{ #category : #accessing }
+AIKMeans >> centroids: aCollectionOfPoints [
+
+	centroids := aCollectionOfPoints
 ]
 
 { #category : #accessing }
@@ -108,15 +115,10 @@ AIKMeans >> fit: aCollectionOfPoints [
 
 { #category : #training }
 AIKMeans >> hasConverged [
-
-	| currentCentroids previousCentroids |
 	
 	(performedIterations >= maxIterations) ifTrue: [ ^ true ].
 
-	currentCentroids := centroidsHistory last.
-	previousCentroids := centroidsHistory nextToLast.
-
-	currentCentroids
+	centroids
 		with: previousCentroids
 		do: [ :current :previous | 
 			((self distanceBetween: current and: previous) closeTo: 0) ifFalse: [ ^ false ] ].
@@ -135,8 +137,10 @@ AIKMeans >> initialize [
 { #category : #initialization }
 AIKMeans >> initializeCentroids: aCollectionOfPoints [
 
+	"If the centroids were already initialized by the user, do not assign them a random value."
+	centroids ifNotEmpty: [ ^ self ].
+	
 	"Choose k points as centroids"
-
 	centroids := (1 to: numberOfClusters) collect: [ :i | 
 		self chooseRandomCentroid: aCollectionOfPoints ]
 ]
@@ -190,7 +194,7 @@ AIKMeans >> step: aCollectionOfPoints [
 
 	self assignClusterToPoints: aCollectionOfPoints.
 	self updateCentroids: aCollectionOfPoints.
-	self updateHistory: aCollectionOfPoints.
+	"self updateHistory: aCollectionOfPoints."
 
 	performedIterations := performedIterations + 1
 ]
@@ -202,6 +206,8 @@ AIKMeans >> updateCentroids: aCollectionOfPoints [
 	
 	| pointsOfThisCentroid |
 	
+	previousCentroids := centroids deepCopy.
+	
 	centroids := (centroids withIndexCollect: [ :centroid :centroidIndex |
 		pointsOfThisCentroid := (1 to: aCollectionOfPoints size)
 			select: [ :pointIndex | (clusters at: pointIndex) = centroidIndex ]
@@ -209,7 +215,7 @@ AIKMeans >> updateCentroids: aCollectionOfPoints [
 			
 		pointsOfThisCentroid isEmpty
 			ifTrue: [ self chooseRandomCentroid: aCollectionOfPoints ]
-			ifFalse: [ 1.0 / pointsOfThisCentroid size * pointsOfThisCentroid sum ] ]).
+			ifFalse: [ pointsOfThisCentroid average ] ]).
 ]
 
 { #category : #training }
