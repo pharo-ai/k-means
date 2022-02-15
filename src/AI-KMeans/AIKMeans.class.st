@@ -91,9 +91,18 @@ AIKMeans >> clustersHistory [
 { #category : #training }
 AIKMeans >> distanceBetween: firstPoint and: secondPoint [
 
-	"Euclidean distance between two points"
+	"It follows the Euclidean distance between two points formula.
+	The code is not idiomatic because of performance. We see that writting this instead of 
+	(firstPoint - secondPoint raisedTo: 2) sum sqrt
+	is about 30% fastest."
 
-	^ (firstPoint - secondPoint raisedTo: 2) sum sqrt
+	| sum |
+	sum := 0.
+	1 to: firstPoint size do: [ :i | 
+		| diff |
+		diff := (firstPoint at: i) - (secondPoint at: i).
+		sum := sum + (diff * diff) ].
+	^ sum sqrt
 ]
 
 { #category : #api }
