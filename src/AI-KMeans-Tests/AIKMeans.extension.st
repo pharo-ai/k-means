@@ -4,3 +4,9 @@ Extension { #name : #AIKMeans }
 AIKMeans >> centroids [
 	^ centroids
 ]
+
+{ #category : #'*AI-KMeans-Tests' }
+AIKMeans >> performedIterations [
+
+	^ performedIterations 
+]
