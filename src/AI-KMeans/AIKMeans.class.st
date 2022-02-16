@@ -182,13 +182,11 @@ AIKMeans >> numberOfClusters: anObject [
 AIKMeans >> score: aCollectionOfPoints [
 
 	| point centroid distances |
-	
 	distances := (1 to: aCollectionOfPoints size) collect: [ :index | 
-		point := aCollectionOfPoints at: index.
-		centroid := centroids at: (clusters at: index).
-		
-		self distanceBetween: point and: centroid ].
+		             point := aCollectionOfPoints at: index.
+		             centroid := centroids at: (clusters at: index).
 
+		             self distanceBetween: point and: centroid ].
 	^ distances sum
 ]
 
