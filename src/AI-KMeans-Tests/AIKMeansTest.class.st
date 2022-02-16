@@ -43,20 +43,9 @@ AIKMeansTest >> testExpectedCentroids [
 	kmeans := AIKMeans numberOfClusters: 2.
 	kmeans centroids: initCentroids.
 	kmeans fit: data.
-	self assert: kmeans centroids equals: #(#(0.25 0) #(0.75 1))
-]
-
-{ #category : #tests }
-AIKMeansTest >> testExpectedIterations [
-
-	| data initCentroids kmeans |
-	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
-	initCentroids := #( #( 0 0 ) #( 1 1 ) ).
-
-	kmeans := AIKMeans numberOfClusters: 2.
-	kmeans centroids: initCentroids.
-	kmeans fit: data.
-	self assert: kmeans performedIterations  equals: 2
+	self
+		assertCollection: kmeans centroids
+		hasSameElements: #( #( 0.25 0 ) #( 0.75 1 ) )
 ]
 
 { #category : #tests }
@@ -112,5 +101,5 @@ AIKMeansTest >> testScore [
 	kmeans := AIKMeans numberOfClusters: 2.
 	kmeans centroids: initCentroids.
 	kmeans fit: data.
-	self assert: (kmeans score:data) equals: 1
+	self assert: (kmeans score: data) equals: 1
 ]
