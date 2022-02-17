@@ -5,6 +5,16 @@ Class {
 }
 
 { #category : #tests }
+AIKMeansTest >> testAssignClusterToPoints [
+
+	| kMeans |
+	kMeans := AIKMeans numberOfClusters: 3.
+	kMeans centroids: #( #( 0.1 0.1 ) #( 0.4 0.4 ) #( 10 10 ) ).
+	kMeans assignClusterToPoints: #( #( 0.1 0.1 ) #( 0.3 0.3 ) #( 9 9 ) ).
+	self assert: kMeans clusters equals: #( 1 2 3 )
+]
+
+{ #category : #tests }
 AIKMeansTest >> testDistanceBetweenAnd [
 
 	| kMeans |

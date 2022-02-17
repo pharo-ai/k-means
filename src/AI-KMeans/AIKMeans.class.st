@@ -15,9 +15,10 @@ Class {
 		'scoresHistory',
 		'maxIterations',
 		'performedIterations',
-		'previousCentroids'
+		'previousCentroids',
+		'rand'
 	],
-	#category : #'AI-KMeans'
+	#category : #'AI-KMeans-Core'
 }
 
 { #category : #accessing }
@@ -38,13 +39,45 @@ AIKMeans class >> numberOfClusters: anInteger [
 AIKMeans >> assignClusterToPoints: aCollectionOfPoints [
 
 	"Assign clusters to each point. We choose the cluster whose centroid minimizes has the shortest distance to the point"
+	"Do not rewrite the code. It is like that for performance."
 
-	| distances |
-	
+	"| distances |
 	clusters := (aCollectionOfPoints collect: [ :point | 
 		distances := centroids collect: [ :centroid | self distanceBetween: point and: centroid ].
+		distances indexOf: distances min ])"
 
-		distances indexOf: distances min ])
+	clusters := Array new: aCollectionOfPoints size.
+	
+	1 to: aCollectionOfPoints size do: [ :i | 
+		| point min minIndex |
+		point := aCollectionOfPoints at: i.
+		minIndex := 1.
+		min := self distanceBetween: point and: (centroids at: 1).
+		
+		2 to: centroids size do: [ :j | 
+			| centroid distance |
+			centroid := centroids at: j.
+			distance := self distanceBetween: point and: centroid.
+			distance < min ifTrue: [ 
+				min := distance.
+				minIndex := j ] ].
+		
+		clusters at: i put: minIndex ]
+]
+
+{ #category : #training }
+AIKMeans >> calculateAverage: pointsOfThisCentroid [
+
+	"This is the same as doing `pointsOfThisCentroid average`.
+	But written this way is fastest"
+	
+	^ (1 to: pointsOfThisCentroid first size) collect: [ :i | 
+		((pointsOfThisCentroid sum: [ :e | e at: i ]) / pointsOfThisCentroid size) asFloat ]
+]
+
+{ #category : #accessing }
+AIKMeans >> centroids [
+	^ centroids
 ]
 
 { #category : #accessing }
@@ -63,17 +96,35 @@ AIKMeans >> centroidsHistory [
 AIKMeans >> chooseRandomCentroid: aCollectionOfPoints [
 
 	"Choose a random point as centroids"
-	
-	| rand axis min max |
+	"The code is like that for performance. Do not rewrite it"
+
+	"| axis min max |
 	
 	^ (1 to: aCollectionOfPoints anyOne size) collect: [ :i |
 		axis := aCollectionOfPoints collect: [ :point | point at: i ].
 	
 		min := axis min.
 		max := axis max.
+		
+		rand nextBetween: min and: max ]"
+
+	| min max pointDimension result |
+	pointDimension := aCollectionOfPoints anyOne size.
+	result := Array new: pointDimension.
 	
-		rand := Random new.
-		rand nextBetween: min and: max ]
+	1 to: pointDimension do: [ :i | 
+		max := aCollectionOfPoints first at: i.
+		min := aCollectionOfPoints first at: i.
+		
+		1 to: aCollectionOfPoints size do: [ :j | 
+			| point coordinate |
+			point := aCollectionOfPoints at: j.
+			coordinate := point at: i.
+			coordinate > max ifTrue: [ max := coordinate ].
+			coordinate < min ifTrue: [ min := coordinate ] ].
+		result at: i put: (rand nextBetween: min and: max) ].
+	
+	^ result
 ]
 
 { #category : #accessing }
@@ -100,7 +151,7 @@ AIKMeans >> distanceBetween: firstPoint and: secondPoint [
 	sum := 0.
 	1 to: firstPoint size do: [ :i | 
 		| diff |
-		diff := (firstPoint at: i) - (secondPoint at: i).
+		diff := (firstPoint at: i) asFloat - (secondPoint at: i) asFloat.
 		sum := sum + (diff * diff) ].
 	^ sum sqrt
 ]
@@ -140,6 +191,8 @@ AIKMeans >> initialize [
 
 	super initialize.
 	self initializeEmptyModel.
+	
+	rand := Random new.
 	maxIterations := self class defaultMaxIterations
 ]
 
@@ -178,15 +231,22 @@ AIKMeans >> numberOfClusters: anObject [
 	numberOfClusters := anObject
 ]
 
-{ #category : #evaluation }
+{ #category : #accessing }
+AIKMeans >> performedIterations [
+
+	^ performedIterations 
+]
+
+{ #category : #'api - evaluation' }
 AIKMeans >> score: aCollectionOfPoints [
 
 	| point centroid distances |
 	distances := (1 to: aCollectionOfPoints size) collect: [ :index | 
-		             point := aCollectionOfPoints at: index.
-		             centroid := centroids at: (clusters at: index).
-
-		             self distanceBetween: point and: centroid ].
+		point := aCollectionOfPoints at: index.
+		centroid := centroids at: (clusters at: index).
+		
+		self distanceBetween: point and: centroid ].
+	
 	^ distances sum
 ]
 
@@ -210,19 +270,20 @@ AIKMeans >> step: aCollectionOfPoints [
 AIKMeans >> updateCentroids: aCollectionOfPoints [
 
 	"Update centroids by moving them to the center of each cluster (mean of all points in the cluster)"
-	
+
 	| pointsOfThisCentroid |
-	
-	previousCentroids := centroids deepCopy.
-	
-	centroids := (centroids withIndexCollect: [ :centroid :centroidIndex |
+
+	previousCentroids := centroids.
+
+	centroids := centroids withIndexCollect: [ :centroid :centroidIndex | 
 		pointsOfThisCentroid := (1 to: aCollectionOfPoints size)
 			select: [ :pointIndex | (clusters at: pointIndex) = centroidIndex ]
 			thenCollect: [ :pointIndex | aCollectionOfPoints at: pointIndex ].
-			
+
 		pointsOfThisCentroid isEmpty
 			ifTrue: [ self chooseRandomCentroid: aCollectionOfPoints ]
-			ifFalse: [ pointsOfThisCentroid average ] ]).
+			ifFalse: [ "pointsOfThisCentroid average"
+				self calculateAverage: pointsOfThisCentroid ] ]
 ]
 
 { #category : #training }
