@@ -8,7 +8,7 @@ SmalltalkCISpec {
   ],
   #testing : {
     #coverage : {
-      #classes : [ 'AIKMeans' ]
+      #classes : [ #AIKMeans, #'AIKMeans class' ]
     }
   }
 }
