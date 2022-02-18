@@ -10,9 +10,6 @@ Class {
 		'numberOfClusters',
 		'centroids',
 		'clusters',
-		'centroidsHistory',
-		'clustersHistory',
-		'scoresHistory',
 		'maxIterations',
 		'performedIterations',
 		'previousCentroids',
@@ -97,12 +94,6 @@ AIKMeans >> centroids: aCollectionOfPoints [
 	bestScore := self score: aCollectionOfPoints
 ]
 
-{ #category : #accessing }
-AIKMeans >> centroidsHistory [
-
-	^ centroidsHistory
-]
-
 { #category : #training }
 AIKMeans >> chooseRandomCentroid: aCollectionOfPoints [
 
@@ -142,12 +133,6 @@ AIKMeans >> chooseRandomCentroid: aCollectionOfPoints [
 AIKMeans >> clusters [
 
 	^ clusters
-]
-
-{ #category : #accessing }
-AIKMeans >> clustersHistory [
-
-	^ clustersHistory
 ]
 
 { #category : #training }
@@ -277,18 +262,11 @@ AIKMeans >> score: aCollectionOfPoints [
 	^ distances sum
 ]
 
-{ #category : #accessing }
-AIKMeans >> scoresHistory [
-
-	^ scoresHistory
-]
-
 { #category : #training }
 AIKMeans >> step: aCollectionOfPoints [
 
 	self assignClusterToPoints: aCollectionOfPoints.
 	self updateCentroids: aCollectionOfPoints.
-	"self updateHistory: aCollectionOfPoints."
 
 	performedIterations := performedIterations + 1
 ]
@@ -310,14 +288,4 @@ AIKMeans >> updateCentroids: aCollectionOfPoints [
 		pointsOfThisCentroid isEmpty
 			ifTrue: [ self chooseRandomCentroid: aCollectionOfPoints ]
 			ifFalse: [ "pointsOfThisCentroid average" self calculateAverage: pointsOfThisCentroid ] ]
-]
-
-{ #category : #training }
-AIKMeans >> updateHistory: aCollectionOfPoints [
-
-	"Save clusters, centroids, and score to the history"
-
-	clustersHistory add: clusters.
-	centroidsHistory add: centroids.
-	scoresHistory add: (self score: aCollectionOfPoints)
 ]
