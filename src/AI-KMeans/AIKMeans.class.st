@@ -221,12 +221,6 @@ AIKMeans >> numberOfClusters: anObject [
 	numberOfClusters := anObject
 ]
 
-{ #category : #accessing }
-AIKMeans >> performedIterations [
-
-	^ performedIterations
-]
-
 { #category : #training }
 AIKMeans >> run: aCollectionOfPoints [
 
