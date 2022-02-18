@@ -8,8 +8,18 @@ Class {
 }
 
 { #category : #'code-critics' }
+ManifestAIKMeans class >> ruleGuardingClauseRuleV1FalsePositive [
+	^ #(#(#(#RGMethodDefinition #(#AIKMeans #run: #false)) #'2022-02-18T11:46:16.166114+01:00') )
+]
+
+{ #category : #'code-critics' }
 ManifestAIKMeans class >> ruleMinMaxRuleV1FalsePositive [
 	^ #(#(#(#RGPackageDefinition #(#'AI-KMeans')) #'2022-02-16T13:46:50.041614+01:00') )
+]
+
+{ #category : #'code-critics' }
+ManifestAIKMeans class >> ruleReGuardClauseRuleV1FalsePositive [
+	^ #(#(#(#RGMethodDefinition #(#AIKMeans #run: #false)) #'2022-02-18T11:46:06.596082+01:00') )
 ]
 
 { #category : #'code-critics' }

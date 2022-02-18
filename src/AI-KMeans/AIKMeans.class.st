@@ -16,7 +16,10 @@ Class {
 		'maxIterations',
 		'performedIterations',
 		'previousCentroids',
-		'rand'
+		'rand',
+		'numberOfTimesItIsRun',
+		'bestScore',
+		'bestCentroids'
 	],
 	#category : #'AI-KMeans-Core'
 }
@@ -25,6 +28,11 @@ Class {
 AIKMeans class >> defaultMaxIterations [
 
 	^ 300
+]
+
+{ #category : #defaults }
+AIKMeans class >> defaultNumberOfTimesItIsRun [
+	^ 5
 ]
 
 { #category : #'instance creation' }
@@ -83,7 +91,10 @@ AIKMeans >> centroids [
 { #category : #accessing }
 AIKMeans >> centroids: aCollectionOfPoints [
 
-	centroids := aCollectionOfPoints
+	bestCentroids := aCollectionOfPoints.
+	centroids := aCollectionOfPoints.
+	self assignClusterToPoints: aCollectionOfPoints.
+	bestScore := self score: aCollectionOfPoints
 ]
 
 { #category : #accessing }
@@ -159,18 +170,13 @@ AIKMeans >> distanceBetween: firstPoint and: secondPoint [
 { #category : #api }
 AIKMeans >> fit: aCollectionOfPoints [
 
-	self initializeEmptyModel.
 	aCollectionOfPoints ifEmpty: [ ^ self ].
 
-	"Each point is an n-dimensional vector (collection of values)"
-	self initializeCentroids: aCollectionOfPoints.
-	
-	"We must run it at least twice"
-	2 timesRepeat: [
-		self step: aCollectionOfPoints ].
-	
-	[ self hasConverged ] whileFalse: [
-		self step: aCollectionOfPoints ].
+	numberOfTimesItIsRun timesRepeat: [ self run: aCollectionOfPoints ].
+
+	"We keep the best centroids after running the algo n-times"
+	centroids := bestCentroids.
+	self assignClusterToPoints: aCollectionOfPoints
 ]
 
 { #category : #training }
@@ -191,18 +197,17 @@ AIKMeans >> initialize [
 
 	super initialize.
 	self initializeEmptyModel.
-	
+
 	rand := Random new.
-	maxIterations := self class defaultMaxIterations
+	maxIterations := self class defaultMaxIterations.
+	numberOfTimesItIsRun := self class defaultNumberOfTimesItIsRun
 ]
 
 { #category : #initialization }
 AIKMeans >> initializeCentroids: aCollectionOfPoints [
 
-	"If the centroids were already initialized by the user, do not assign them a random value."
-	centroids ifNotEmpty: [ ^ self ].
-	
 	"Choose k points as centroids"
+
 	centroids := (1 to: numberOfClusters) collect: [ :i | 
 		self chooseRandomCentroid: aCollectionOfPoints ]
 ]
@@ -212,16 +217,16 @@ AIKMeans >> initializeEmptyModel [
 
 	clusters := OrderedCollection new.
 	centroids := OrderedCollection new.
-	
-	performedIterations := 0.
+	performedIterations := 0
 
-	centroidsHistory := OrderedCollection new.
+	"centroidsHistory := OrderedCollection new.
 	clustersHistory := OrderedCollection new.
-	scoresHistory := OrderedCollection new
+	scoresHistory := OrderedCollection new"
 ]
 
 { #category : #accessing }
-AIKMeans >> maxIterations: anInteger [ 
+AIKMeans >> maxIterations: anInteger [
+
 	maxIterations := anInteger
 ]
 
@@ -234,7 +239,29 @@ AIKMeans >> numberOfClusters: anObject [
 { #category : #accessing }
 AIKMeans >> performedIterations [
 
-	^ performedIterations 
+	^ performedIterations
+]
+
+{ #category : #training }
+AIKMeans >> run: aCollectionOfPoints [
+
+	| score |
+	self initializeEmptyModel.
+	"Each point is an n-dimensional vector (collection of values)"
+	self initializeCentroids: aCollectionOfPoints.
+
+	"We must run it at least twice"
+	2 timesRepeat: [ self step: aCollectionOfPoints ].
+	[ self hasConverged ] whileFalse: [ self step: aCollectionOfPoints ].
+
+	"The best centroid points are the ones that minimize the score.
+	The score is the sum of the mean square errors of the points and its closest centroid."
+	score := self score: aCollectionOfPoints.
+	bestScore ifNil: [ bestScore := score ].
+	bestCentroids ifNil: [ bestCentroids := centroids copy ].
+	bestScore > score ifTrue: [ 
+		bestCentroids := centroids copy.
+		bestScore := score ]
 ]
 
 { #category : #'api - evaluation' }
@@ -282,8 +309,7 @@ AIKMeans >> updateCentroids: aCollectionOfPoints [
 
 		pointsOfThisCentroid isEmpty
 			ifTrue: [ self chooseRandomCentroid: aCollectionOfPoints ]
-			ifFalse: [ "pointsOfThisCentroid average"
-				self calculateAverage: pointsOfThisCentroid ] ]
+			ifFalse: [ "pointsOfThisCentroid average" self calculateAverage: pointsOfThisCentroid ] ]
 ]
 
 { #category : #training }

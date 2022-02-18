@@ -56,12 +56,10 @@ AIKMeansTest >> testEmptyDataset [
 { #category : #tests }
 AIKMeansTest >> testExpectedCentroids [
 
-	| data initCentroids kmeans |
+	| data kmeans |
 	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
-	initCentroids := #( #( 0 0 ) #( 1 1 ) ).
 
 	kmeans := AIKMeans numberOfClusters: 2.
-	kmeans centroids: initCentroids.
 	kmeans fit: data.
 	self
 		assertCollection: kmeans centroids
@@ -116,10 +114,35 @@ AIKMeansTest >> testScore [
 
 	| data initCentroids kmeans |
 	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
-	initCentroids := #( #( 0 0 ) #( 1 1 ) ).
+	initCentroids := #( #( 0 0 ) #( 10 1 ) ).
 
 	kmeans := AIKMeans numberOfClusters: 2.
 	kmeans centroids: initCentroids.
+	kmeans assignClusterToPoints: data.
+	self assert: (kmeans score: data) closeTo: 0.5 + 2 sqrt + 1.11803
+]
+
+{ #category : #tests }
+AIKMeansTest >> testScoreAfterFitting [
+
+	| data kmeans |
+	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
+
+	kmeans := AIKMeans numberOfClusters: 2.
 	kmeans fit: data.
 	self assert: (kmeans score: data) equals: 1
+]
+
+{ #category : #tests }
+AIKMeansTest >> testSettingBestCentroidsDontChangeTheCentroids [
+
+	| data bestCentroids kmeans |
+	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
+
+	bestCentroids := #( #( 0.75 1.0 ) #( 0.25 0.0 ) ).
+
+	kmeans := AIKMeans numberOfClusters: 2.
+	kmeans centroids: bestCentroids.
+	kmeans fit: data.
+	self assert: kmeans centroids equals: bestCentroids
 ]
