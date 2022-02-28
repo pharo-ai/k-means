@@ -14,9 +14,9 @@ Class {
 		'performedIterations',
 		'previousCentroids',
 		'rand',
-		'numberOfTimesItIsRun',
 		'bestScore',
-		'bestCentroids'
+		'bestCentroids',
+		'timesToRun'
 	],
 	#category : #'AI-KMeans-Core'
 }
@@ -157,7 +157,7 @@ AIKMeans >> fit: aCollectionOfPoints [
 
 	aCollectionOfPoints ifEmpty: [ ^ self ].
 
-	numberOfTimesItIsRun timesRepeat: [ self run: aCollectionOfPoints ].
+	timesToRun timesRepeat: [ self run: aCollectionOfPoints ].
 
 	"We keep the best centroids after running the algo n-times"
 	centroids := bestCentroids.
@@ -185,7 +185,7 @@ AIKMeans >> initialize [
 
 	rand := Random new.
 	maxIterations := self class defaultMaxIterations.
-	numberOfTimesItIsRun := self class defaultNumberOfTimesItIsRun
+	timesToRun := self class defaultNumberOfTimesItIsRun
 ]
 
 { #category : #initialization }
@@ -263,6 +263,12 @@ AIKMeans >> step: aCollectionOfPoints [
 	self updateCentroids: aCollectionOfPoints.
 
 	performedIterations := performedIterations + 1
+]
+
+{ #category : #accessing }
+AIKMeans >> timesToRun: anInteger [
+
+	timesToRun := anInteger
 ]
 
 { #category : #training }
