@@ -311,5 +311,5 @@ AIKMeans >> updateCentroids: aCollectionOfPoints [
 
 		pointsOfThisCentroid isEmpty
 			ifTrue: [ self chooseRandomCentroid: aCollectionOfPoints ]
-			ifFalse: [ "pointsOfThisCentroid average" self calculateAverage: pointsOfThisCentroid ] ]
+			ifFalse: [ self calculateAverage: pointsOfThisCentroid ] ]
 ]
