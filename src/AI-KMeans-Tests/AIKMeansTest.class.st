@@ -12,7 +12,7 @@ AIKMeansTest >> testAssignClusterToPoints [
 	kMeans maxIterations: 5.
 	kMeans centroids: #( #( 0.1 0.1 ) #( 0.4 0.4 ) #( 10 10 ) ).
 	kMeans assignClusterToPoints: #( #( 0.1 0.1 ) #( 0.3 0.3 ) #( 9 9 ) ).
-	self assert: kMeans clusters equals: #( 1 2 3 )
+	self assertCollection: kMeans clusters hasSameElements: #( 1 2 3 )
 ]
 
 { #category : #tests }
@@ -108,6 +108,19 @@ AIKMeansTest >> testNumberOfCentroidsMatchExpectation [
 	kmeans fit: data.
 
 	self assert: (kmeans centroids size) equals: clusters
+]
+
+{ #category : #tests }
+AIKMeansTest >> testPredict [
+
+	| data kmeans |
+	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
+
+	kmeans := AIKMeans numberOfClusters: 2.
+	kmeans fit: data.
+	self
+		assertCollection: kmeans clusters asOrderedCollection
+		equals: (kmeans predict: data) asOrderedCollection
 ]
 
 { #category : #tests }

@@ -41,6 +41,24 @@ AIKMeans class >> numberOfClusters: anInteger [
 ]
 
 { #category : #training }
+AIKMeans >> assignClusterToPoint: aPoint [
+
+	| min minIndex |
+	minIndex := 1.
+	min := self distanceBetween: aPoint and: (centroids at: 1).
+
+	2 to: centroids size do: [ :j | 
+		| centroid distance |
+		centroid := centroids at: j.
+		distance := self distanceBetween: aPoint and: centroid.
+		distance < min ifTrue: [ 
+			min := distance.
+			minIndex := j ] ].
+
+	^ minIndex
+]
+
+{ #category : #training }
 AIKMeans >> assignClusterToPoints: aCollectionOfPoints [
 
 	"Assign clusters to each point. We choose the cluster whose centroid minimizes has the shortest distance to the point"
@@ -54,19 +72,9 @@ AIKMeans >> assignClusterToPoints: aCollectionOfPoints [
 	clusters := Array new: aCollectionOfPoints size.
 	
 	1 to: aCollectionOfPoints size do: [ :i | 
-		| point min minIndex |
+		| point minIndex |
 		point := aCollectionOfPoints at: i.
-		minIndex := 1.
-		min := self distanceBetween: point and: (centroids at: 1).
-		
-		2 to: centroids size do: [ :j | 
-			| centroid distance |
-			centroid := centroids at: j.
-			distance := self distanceBetween: point and: centroid.
-			distance < min ifTrue: [ 
-				min := distance.
-				minIndex := j ] ].
-		
+		minIndex := self assignClusterToPoint: point.
 		clusters at: i put: minIndex ]
 ]
 
@@ -82,6 +90,7 @@ AIKMeans >> calculateAverage: pointsOfThisCentroid [
 
 { #category : #accessing }
 AIKMeans >> centroids [
+
 	^ centroids
 ]
 
@@ -164,10 +173,8 @@ AIKMeans >> fit: aCollectionOfPoints [
 	self assignClusterToPoints: aCollectionOfPoints
 ]
 
-{ #category : #training }
+{ #category : #testing }
 AIKMeans >> hasConverged [
-	
-	(performedIterations >= maxIterations) ifTrue: [ ^ true ].
 
 	centroids
 		with: previousCentroids
@@ -175,6 +182,18 @@ AIKMeans >> hasConverged [
 			((self distanceBetween: current and: previous) closeTo: 0) ifFalse: [ ^ false ] ].
 
 	^ true
+]
+
+{ #category : #testing }
+AIKMeans >> hasReachedMaxIterations [
+
+	^ performedIterations >= maxIterations
+]
+
+{ #category : #testing }
+AIKMeans >> hasToStopIterating [
+
+	^ self hasConverged or: [ self hasReachedMaxIterations ]
 ]
 
 { #category : #initialization }
@@ -203,10 +222,6 @@ AIKMeans >> initializeEmptyModel [
 	clusters := OrderedCollection new.
 	centroids := OrderedCollection new.
 	performedIterations := 0
-
-	"centroidsHistory := OrderedCollection new.
-	clustersHistory := OrderedCollection new.
-	scoresHistory := OrderedCollection new"
 ]
 
 { #category : #accessing }
@@ -221,6 +236,16 @@ AIKMeans >> numberOfClusters: anObject [
 	numberOfClusters := anObject
 ]
 
+{ #category : #api }
+AIKMeans >> predict: aCollectionOfPoints [
+
+	| predictions |
+	predictions := OrderedCollection new.
+	1 to: aCollectionOfPoints size do: [ :index | 
+		predictions add: (self assignClusterToPoint: (aCollectionOfPoints at: index)) ].
+	^ predictions
+]
+
 { #category : #training }
 AIKMeans >> run: aCollectionOfPoints [
 
@@ -231,7 +256,7 @@ AIKMeans >> run: aCollectionOfPoints [
 
 	"We must run it at least twice"
 	2 timesRepeat: [ self step: aCollectionOfPoints ].
-	[ self hasConverged ] whileFalse: [ self step: aCollectionOfPoints ].
+	[ self hasToStopIterating ] whileFalse: [ self step: aCollectionOfPoints ].
 
 	"The best centroid points are the ones that minimize the score.
 	The score is the sum of the mean square errors of the points and its closest centroid."
