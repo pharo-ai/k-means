@@ -207,12 +207,32 @@ AIKMeans >> initialize [
 ]
 
 { #category : #initialization }
-AIKMeans >> initializeCentroids: aCollectionOfPoints [
+AIKMeans >> initializeCentroidsKMeansPlusPlus: points [
 
-	"Choose k points as centroids"
+	" The k-means++ is a new algorithm for choosing the centroids. It was proposed in 2007 by Arthur et Vassilvitskii. Paper: https://theory.stanford.edu/~sergei/papers/kMeansPP-soda.pdf
+	
+	1. Arbitrarily choose k initial centers C = {c1, . . . , ck}.
+	2. For each i in {1, ... , k}, set the cluster Ci to be the set of points in X that are closer to ci than they are to cj for all j != i.
+	3. For each i in {1, ... , k}, set ci to be the center of mass of all points in Ci: ci = ((1/|Ci|) * ∑	x in Ci) x.
+	4. Repeat Steps 2 and 3 until C no longer changes"
 
-	centroids := (1 to: numberOfClusters) collect: [ :i | 
-		self chooseRandomCentroid: aCollectionOfPoints ]
+	| firstCentroid previouslyChosenCentroid |
+	firstCentroid := points atRandom.
+	previouslyChosenCentroid := firstCentroid.
+	centroids := OrderedCollection with: firstCentroid.
+	
+	[ centroids size < numberOfClusters ] whileTrue: [
+		| maxDistance |
+		maxDistance := Float negativeInfinity.
+		
+		points do: [ :aPoint | 
+			| distance |
+			"Here we should pick a point using the probabilites of being picked. For the moment, we will pick the most distant point."
+			distance := self distanceBetween: aPoint and: previouslyChosenCentroid.
+			distance > maxDistance ifTrue: [ maxDistance := distance ] ].
+		
+		centroids add: maxDistance ].
+	
 ]
 
 { #category : #initialization }
@@ -221,6 +241,13 @@ AIKMeans >> initializeEmptyModel [
 	clusters := OrderedCollection new.
 	centroids := OrderedCollection new.
 	performedIterations := 0
+]
+
+{ #category : #initialization }
+AIKMeans >> initializeRandomCentroids: aCollectionOfPoints [
+
+	centroids := (1 to: numberOfClusters) collect: [ :i | 
+		self chooseRandomCentroid: aCollectionOfPoints ]
 ]
 
 { #category : #accessing }
@@ -251,7 +278,7 @@ AIKMeans >> run: aCollectionOfPoints [
 	| score |
 	self initializeEmptyModel.
 	"Each point is an n-dimensional vector (collection of values)"
-	self initializeCentroids: aCollectionOfPoints.
+	self initializeCentroidsKMeansPlusPlus: aCollectionOfPoints.
 
 	"We must run it at least twice"
 	2 timesRepeat: [ self step: aCollectionOfPoints ].
