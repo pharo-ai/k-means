@@ -18,11 +18,11 @@ AIKMeansTest >> setUp [
 { #category : #tests }
 AIKMeansTest >> testAssignClusterToPoints [
 
-	| kMeans |
-	kMeans := AIKMeans numberOfClusters: 3.
+	kMeans numberOfClusters: 3.
 	kMeans maxIterations: 5.
 	kMeans centroids: #( #( 0.1 0.1 ) #( 0.4 0.4 ) #( 10 10 ) ).
 	kMeans assignClusterToPoints: #( #( 0.1 0.1 ) #( 0.3 0.3 ) #( 9 9 ) ).
+	
 	self assertCollection: kMeans clusters hasSameElements: #( 1 2 3 )
 ]
 
@@ -163,19 +163,4 @@ AIKMeansTest >> testScoreAfterFitting [
 	kMeans numberOfClusters: 2.
 	kMeans fit: data.
 	self assert: (kMeans score: data) equals: 1
-]
-
-{ #category : #tests }
-AIKMeansTest >> testSettingBestCentroidsDontChangeTheCentroids [
-
-	| data bestCentroids |
-	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
-
-	bestCentroids := #( #( 0.75 1.0 ) #( 0.25 0.0 ) ).
-
-	kMeans numberOfClusters: 2.
-	kMeans centroids: bestCentroids.
-	kMeans fit: data.
-	
-	self assert: kMeans centroids equals: bestCentroids
 ]
