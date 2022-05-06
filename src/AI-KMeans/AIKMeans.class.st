@@ -152,7 +152,7 @@ AIKMeans >> distanceBetween: firstPoint and: secondPoint [
 	(firstPoint - secondPoint raisedTo: 2) sum sqrt"
 
 	| sum |
-	sum := 0.
+	sum := 0.0.
 	1 to: firstPoint size do: [ :i | 
 		| diff |
 		diff := (firstPoint at: i) asFloat - (secondPoint at: i) asFloat.
@@ -216,23 +216,27 @@ AIKMeans >> initializeCentroidsKMeansPlusPlus: points [
 	3. For each i in {1, ... , k}, set ci to be the center of mass of all points in Ci: ci = ((1/|Ci|) * ∑	x in Ci) x.
 	4. Repeat Steps 2 and 3 until C no longer changes"
 
-	| firstCentroid previouslyChosenCentroid |
+	| firstCentroid |
 	firstCentroid := points atRandom.
-	previouslyChosenCentroid := firstCentroid.
 	centroids := OrderedCollection with: firstCentroid.
 	
 	[ centroids size < numberOfClusters ] whileTrue: [
-		| maxDistance |
-		maxDistance := Float negativeInfinity.
+		| distances pointWithMaxDistance |
+		distances := Array new: points size.
 		
-		points do: [ :aPoint | 
+		points doWithIndex: [ :aPoint :aPointIndex | 
 			| distance |
-			"Here we should pick a point using the probabilites of being picked. For the moment, we will pick the most distant point."
-			distance := self distanceBetween: aPoint and: previouslyChosenCentroid.
-			distance > maxDistance ifTrue: [ maxDistance := distance ] ].
+			distance := Float infinity.
+			
+			centroids do: [ :aCentroid |
+				| euclideanDistance |
+				euclideanDistance := self distanceBetween: aPoint and: aCentroid.
+				distance := distance min: euclideanDistance ].
+			
+			distances at: aPointIndex put: distance ].
 		
-		centroids add: maxDistance ].
-	
+		pointWithMaxDistance := points at: distances argmax.
+		centroids add: pointWithMaxDistance ]
 ]
 
 { #category : #initialization }
@@ -312,7 +316,7 @@ AIKMeans >> step: aCollectionOfPoints [
 
 	self assignClusterToPoints: aCollectionOfPoints.
 	self updateCentroids: aCollectionOfPoints.
-
+	
 	performedIterations := performedIterations + 1
 ]
 
