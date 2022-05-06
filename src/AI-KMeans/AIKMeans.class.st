@@ -311,6 +311,13 @@ AIKMeans >> timesToRun: anInteger [
 	timesToRun := anInteger
 ]
 
+{ #category : #api }
+AIKMeans >> transform: aCollectionOfPoints [
+
+	^ aCollectionOfPoints collect: [ :aPoint | 
+		  centroids collect: [ :aCentroid | self distanceBetween: aPoint and: aCentroid ] ]
+]
+
 { #category : #training }
 AIKMeans >> updateCentroids: aCollectionOfPoints [
 

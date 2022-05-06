@@ -164,3 +164,16 @@ AIKMeansTest >> testScoreAfterFitting [
 	kMeans fit: data.
 	self assert: (kMeans score: data) equals: 1
 ]
+
+{ #category : #tests }
+AIKMeansTest >> testTransform [
+
+	| points euclideanDistance |
+	points := #( #( 0 0 ) #( 1 1 ) ).
+	euclideanDistance := (1 + 1) sqrt.
+	kMeans
+		numberOfClusters: 2;
+		centroids: #( #( 0 0 ) #( 1 1 ) ).
+
+	self assert: (kMeans transform: points) equals: { { 0. euclideanDistance } . { euclideanDistance . 0 } }
+]
