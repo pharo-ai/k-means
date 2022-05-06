@@ -60,9 +60,10 @@ AIKMeans >> calculateAverage: pointsOfThisCentroid [
 
 	"This is the same as doing `pointsOfThisCentroid average`.
 	But written this way is faster"
-	
+
 	^ (1 to: pointsOfThisCentroid first size) collect: [ :i | 
-		((pointsOfThisCentroid sum: [ :e | e at: i ]) / pointsOfThisCentroid size) asFloat ]
+		((pointsOfThisCentroid sum: [ :e | e at: i ])
+		 / pointsOfThisCentroid size) asFloat ]
 ]
 
 { #category : #accessing }
