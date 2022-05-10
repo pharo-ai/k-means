@@ -16,7 +16,8 @@ Class {
 		'rand',
 		'bestScore',
 		'bestCentroids',
-		'timesToRun'
+		'timesToRun',
+		'euclideanDistance'
 	],
 	#category : #'AI-KMeans-Core'
 }
@@ -130,17 +131,7 @@ AIKMeans >> clusters [
 { #category : #training }
 AIKMeans >> distanceBetween: firstPoint and: secondPoint [
 
-	"It follows the Euclidean distance between two points formula.
-	The code is not idiomatic because of performance. We see that writting this instead of 
-	(firstPoint - secondPoint raisedTo: 2) sum sqrt"
-
-	| sum |
-	sum := 0.0.
-	1 to: firstPoint size do: [ :i | 
-		| diff |
-		diff := (firstPoint at: i) asFloat - (secondPoint at: i) asFloat.
-		sum := sum + (diff * diff) ].
-	^ sum sqrt
+	^ euclideanDistance distanceBetween: firstPoint and: secondPoint
 ]
 
 { #category : #api }
@@ -185,6 +176,7 @@ AIKMeans >> initialize [
 	self initializeEmptyModel.
 
 	rand := Random new.
+	euclideanDistance := AIEuclideanDistance new.
 	maxIterations := self class defaultMaxIterations.
 	timesToRun := self class defaultNumberOfTimesItIsRun
 ]
