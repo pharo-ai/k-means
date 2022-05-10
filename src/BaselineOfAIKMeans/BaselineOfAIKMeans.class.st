@@ -19,6 +19,6 @@ BaselineOfAIKMeans >> baseline: spec [
 		
 		"Packages"
 		spec
-			package: 'AI-KMeans';
+			package: 'AI-KMeans' with: [ spec requires: #( 'AIInternalEditDistances' ) ];
 			package: 'AI-KMeans-Tests' with: [ spec requires: #( 'AI-KMeans' ) ] ]
 ]
