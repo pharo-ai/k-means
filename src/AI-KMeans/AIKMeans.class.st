@@ -184,12 +184,12 @@ AIKMeans >> initialize [
 { #category : #initialization }
 AIKMeans >> initializeCentroidsKMeansPlusPlus: points [
 
-	" The k-means++ is a new algorithm for choosing the centroids. It was proposed in 2007 by Arthur et Vassilvitskii. Paper: https://theory.stanford.edu/~sergei/papers/kMeansPP-soda.pdf
+	" The k-means++ is an algorithm for initializing the centroids. It was proposed in 2007 by Arthur et Vassilvitskii. 
 	
-	1. Arbitrarily choose k initial centers C = {c1, . . . , ck}.
-	2. For each i in {1, ... , k}, set the cluster Ci to be the set of points in X that are closer to ci than they are to cj for all j != i.
-	3. For each i in {1, ... , k}, set ci to be the center of mass of all points in Ci: ci = ((1/|Ci|) * ∑	x in Ci) x.
-	4. Repeat Steps 2 and 3 until C no longer changes"
+	1. Choose the first centroid to be a random point.
+	2. Calculate the distance of all the point to the choosen clusters. Keep the min distance of a point to the choosen clusters.
+	3. Choose the next cluster the point being the farest being the one with the most probability of being choose.
+	4. Repeat Steps 2 and 3 k centroids are selected"
 
 	| firstCentroid |
 	firstCentroid := points atRandom.
@@ -200,15 +200,15 @@ AIKMeans >> initializeCentroidsKMeansPlusPlus: points [
 		distances := Array new: points size.
 		
 		points doWithIndex: [ :aPoint :aPointIndex | 
-			| distance |
-			distance := Float infinity.
+			| minDistance |
+			minDistance := Float infinity.
 			
 			centroids do: [ :aCentroid |
-				| euclideanDistance |
-				euclideanDistance := self distanceBetween: aPoint and: aCentroid.
-				distance := distance min: euclideanDistance ].
+				| distance |	
+				distance := self distanceBetween: aPoint and: aCentroid.
+				minDistance := minDistance min: distance ].
 			
-			distances at: aPointIndex put: distance ].
+			distances at: aPointIndex put: minDistance ].
 		
 		pointWithMaxDistance := points at: distances argmax.
 		centroids add: pointWithMaxDistance ]
