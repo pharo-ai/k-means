@@ -3,12 +3,14 @@
 ![Build status](https://github.com/pharo-ai/k-means/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/pharo-ai/k-means/badge.svg?branch=master)](https://coveralls.io/github/pharo-ai/k-means?branch=master)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/pharo-ai/KMeans/master/LICENSE)
+[![Pharo version](https://img.shields.io/badge/Pharo-11-%23aac9ff.svg)](https://pharo.org/download)
+[![Pharo version](https://img.shields.io/badge/Pharo-10-%23aac9ff.svg)](https://pharo.org/download)
 
-K-means clustering in Pharo
+K-means clustering in Pharo.
 
 ## How to install it?
 
-To install k-means, go to the Playground (Ctrl+OW) in your [Pharo](https://pharo.org/) image and execute the following Metacello script (select it and press Do-it button or Ctrl+D):
+To install the project, go to the Playground (Ctrl+OW) in your [Pharo](https://pharo.org/) image and execute the following Metacello script (select it and press Do-it button or Ctrl+D):
 
 ```Smalltalk
 Metacello new
@@ -29,4 +31,6 @@ spec
 
 If you are new to baselines and Metacello, check out the [Baselines](https://github.com/pharo-open-documentation/pharo-wiki/blob/master/General/Baselines.md) tutorial on Pharo Wiki.
 
-## How to use it?
+## Quick start
+
+
