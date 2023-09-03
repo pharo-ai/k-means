@@ -163,12 +163,6 @@ AIKMeans >> hasReachedMaxIterations [
 	^ performedIterations >= maxIterations
 ]
 
-{ #category : #testing }
-AIKMeans >> hasToStopIterating [
-
-	^ self hasConverged or: [ self hasReachedMaxIterations ]
-]
-
 { #category : #initialization }
 AIKMeans >> initialize [
 
@@ -262,7 +256,7 @@ AIKMeans >> run: aCollectionOfPoints [
 
 	"We must run it at least twice"
 	2 timesRepeat: [ self step: aCollectionOfPoints ].
-	[ self hasToStopIterating ] whileFalse: [ self step: aCollectionOfPoints ].
+	[ self hasConverged or: [ self hasReachedMaxIterations ] ] whileFalse: [ self step: aCollectionOfPoints ].
 
 	"The best centroid points are the ones that minimize the score.
 	The score is the sum of the mean square errors of the points and its cluster."
