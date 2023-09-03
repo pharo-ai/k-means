@@ -85,23 +85,16 @@ AIKMeans >> chooseRandomCentroid: aCollectionOfPoints [
 	"Choose a random point as centroids"
 	"The code is like that for performance. Do not rewrite it"
 
-	| min max pointDimension result |
+	| min max pointDimension centroid |
 	pointDimension := aCollectionOfPoints anyOne size.
-	result := Array new: pointDimension.
+	centroid := Array new: pointDimension.
 	
 	1 to: pointDimension do: [ :i | 
-		max := aCollectionOfPoints first at: i.
-		min := aCollectionOfPoints first at: i.
-		
-		1 to: aCollectionOfPoints size do: [ :j | 
-			| point coordinate |
-			point := aCollectionOfPoints at: j.
-			coordinate := point at: i.
-			max := max max: coordinate.
-			min := min min: coordinate. ].
-		result at: i put: (rand nextBetween: min and: max) ].
+		max := aCollectionOfPoints max: [ :arr | arr at: i ].
+		min := aCollectionOfPoints min: [ :arr | arr at: i ].
+		centroid at: i put: (rand nextBetween: min and: max) ].
 	
-	^ result
+	^ centroid
 ]
 
 { #category : #training }
