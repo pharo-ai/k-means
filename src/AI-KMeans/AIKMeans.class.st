@@ -14,8 +14,6 @@ Class {
 		'performedIterations',
 		'previousCentroids',
 		'rand',
-		'bestScore',
-		'bestCentroids',
 		'timesToRun',
 		'euclideanDistance'
 	],
@@ -93,11 +91,21 @@ AIKMeans >> distanceBetween: firstPoint and: secondPoint [
 { #category : #api }
 AIKMeans >> fit: aCollectionOfPoints [
 
+	| score bestScore bestCentroids |
 	aCollectionOfPoints ifEmpty: [ ^ self ].
+	bestScore := Float infinity.
 
-	timesToRun timesRepeat: [ self run: aCollectionOfPoints ].
+	timesToRun timesRepeat: [
+		self kMeansAlgorithm: aCollectionOfPoints.
 
-	"We keep the best centroids after running the algo n-times"
+		"The best centroid points are the ones that minimize the score.
+		The score is the sum of the mean square errors of the points and its cluster."
+		score := self score: aCollectionOfPoints.
+		bestScore > score ifTrue: [
+			bestCentroids := centroids.
+			bestScore := score ] ].
+
+	"We keep the best centroids after running the algo timesToRun-times"
 	centroids := bestCentroids.
 	self assignClusterToPoints: aCollectionOfPoints
 ]
@@ -162,6 +170,20 @@ AIKMeans >> initializeRandomCentroids: aCollectionOfPoints [
 		self chooseRandomCentroid: aCollectionOfPoints ]
 ]
 
+{ #category : #training }
+AIKMeans >> kMeansAlgorithm: aCollectionOfPoints [
+
+	performedIterations := 0.
+	"Initialize the centrois using the k-means++ algorithm"
+	self initializeCentroidsKMeansPlusPlus: aCollectionOfPoints.
+
+	[
+	self assignClusterToPoints: aCollectionOfPoints.
+	self updateCentroids: aCollectionOfPoints.
+	performedIterations := performedIterations + 1 ] 
+		doWhileFalse: [ self hasConverged or: [ self hasReachedMaxIterations ] ].
+]
+
 { #category : #'api - configuration' }
 AIKMeans >> maxIterations: anInteger [
 
@@ -199,31 +221,6 @@ AIKMeans >> predict: aCollectionOfPoints [
 	1 to: aCollectionOfPoints size do: [ :index | 
 		predictions add: (self nearestCentroidToPoint: (aCollectionOfPoints at: index)) ].
 	^ predictions
-]
-
-{ #category : #training }
-AIKMeans >> run: aCollectionOfPoints [
-
-	| score |
-	performedIterations := 0.
-	bestCentroids := OrderedCollection new.
-	bestScore := Float infinity.
-	"Initialize the centrois using the k-means++ algorithm"
-	self initializeCentroidsKMeansPlusPlus: aCollectionOfPoints.
-
-	[
-	self assignClusterToPoints: aCollectionOfPoints.
-	self updateCentroids: aCollectionOfPoints.
-	performedIterations := performedIterations + 1 ] 
-		doWhileFalse: [ self hasConverged or: [ self hasReachedMaxIterations ] ].
-
-	"The best centroid points are the ones that minimize the score.
-	The score is the sum of the mean square errors of the points and its cluster."
-	score := self score: aCollectionOfPoints.
-
-	bestScore > score ifTrue: [
-		bestCentroids := centroids.
-		bestScore := score ]
 ]
 
 { #category : #'api - evaluation' }
