@@ -43,28 +43,10 @@ AIKMeans class >> numberOfClusters: anInteger [
 
 { #category : #training }
 AIKMeans >> assignClusterToPoints: aCollectionOfPoints [
+	"Assign clusters to each point. We choose the cluster whose centroid minimizes has the
+	shortest distance to the point"
 
-	"Assign clusters to each point. We choose the cluster whose centroid minimizes has the shortest distance to the point"
-	"Do not rewrite the code. It is like that for performance."
-
-	clusters := Array new: aCollectionOfPoints size.
-
-	1 to: aCollectionOfPoints size do: [ :i | 
-		| point minIndex |
-		point := aCollectionOfPoints at: i.
-		minIndex := self clusterNearestToPoint: point.
-		clusters at: i put: minIndex ]
-]
-
-{ #category : #training }
-AIKMeans >> calculateAverage: pointsOfThisCentroid [
-
-	"This is the same as doing `pointsOfThisCentroid average`.
-	But written this way is faster"
-
-	^ (1 to: pointsOfThisCentroid first size) collect: [ :i | 
-		((pointsOfThisCentroid sum: [ :e | e at: i ])
-		 / pointsOfThisCentroid size) asFloat ]
+	clusters := aCollectionOfPoints collect: [ :aPoint | self nearestCentroidToPoint: aPoint ]
 ]
 
 { #category : #accessing }
@@ -83,36 +65,17 @@ AIKMeans >> centroids: aCollectionOfPoints [
 AIKMeans >> chooseRandomCentroid: aCollectionOfPoints [
 
 	"Choose a random point as centroids"
-	"The code is like that for performance. Do not rewrite it"
 
 	| min max pointDimension centroid |
-	pointDimension := aCollectionOfPoints anyOne size.
-	centroid := Array new: pointDimension.
+	pointDimension := aCollectionOfPoints first size.
+	centroid := OrderedCollection new.
 	
 	1 to: pointDimension do: [ :i | 
-		max := aCollectionOfPoints max: [ :arr | arr at: i ].
-		min := aCollectionOfPoints min: [ :arr | arr at: i ].
-		centroid at: i put: (rand nextBetween: min and: max) ].
+		max := aCollectionOfPoints max: [ :point | point at: i ].
+		min := aCollectionOfPoints min: [ :point | point at: i ].
+		centroid add: (rand nextBetween: min and: max) ].
 	
-	^ centroid
-]
-
-{ #category : #training }
-AIKMeans >> clusterNearestToPoint: aPoint [
-
-	| min minIndex |
-	minIndex := 1.
-	min := self distanceBetween: aPoint and: (centroids at: 1).
-
-	2 to: centroids size do: [ :j | 
-		| centroid distance |
-		centroid := centroids at: j.
-		distance := self distanceBetween: aPoint and: centroid.
-		distance < min ifTrue: [ 
-			min := distance.
-			minIndex := j ] ].
-
-	^ minIndex
+	^ centroid asArray
 ]
 
 { #category : #accessing }
@@ -142,10 +105,8 @@ AIKMeans >> fit: aCollectionOfPoints [
 { #category : #testing }
 AIKMeans >> hasConverged [
 
-	centroids
-		with: previousCentroids
-		do: [ :current :previous | 
-			((self distanceBetween: current and: previous) closeTo: 0) ifFalse: [ ^ false ] ].
+	centroids with: previousCentroids do: [ :current :previous |
+		((self distanceBetween: current and: previous) closeTo: 0) ifFalse: [ ^ false ] ].
 
 	^ true
 ]
@@ -160,7 +121,11 @@ AIKMeans >> hasReachedMaxIterations [
 AIKMeans >> initialize [
 
 	super initialize.
-	self initializeEmptyModel.
+
+	clusters := OrderedCollection new.
+	centroids := OrderedCollection new.
+	previousCentroids := OrderedCollection new.
+	performedIterations := 0.
 
 	rand := Random new.
 	euclideanDistance := AIEuclideanDistance new.
@@ -184,29 +149,10 @@ AIKMeans >> initializeCentroidsKMeansPlusPlus: points [
 	
 	[ centroids size < numberOfClusters ] whileTrue: [
 		| distances pointWithMaxDistance |
-		distances := Array new: points size.
-		
-		points doWithIndex: [ :aPoint :aPointIndex | 
-			| minDistance |
-			minDistance := Float infinity.
-			
-			centroids do: [ :aCentroid |
-				| distance |	
-				distance := self distanceBetween: aPoint and: aCentroid.
-				minDistance := minDistance min: distance ].
-			
-			distances at: aPointIndex put: minDistance ].
-		
+		distances := points collect: [ :aPoint | 
+			centroids min: [ :aCentroid | self distanceBetween: aPoint and: aCentroid ] ].
 		pointWithMaxDistance := points at: distances argmax.
 		centroids add: pointWithMaxDistance ]
-]
-
-{ #category : #initialization }
-AIKMeans >> initializeEmptyModel [
-
-	clusters := OrderedCollection new.
-	centroids := OrderedCollection new.
-	performedIterations := 0
 ]
 
 { #category : #initialization }
@@ -222,6 +168,23 @@ AIKMeans >> maxIterations: anInteger [
 	maxIterations := anInteger
 ]
 
+{ #category : #training }
+AIKMeans >> nearestCentroidToPoint: aPoint [
+
+	| minDistance nearestCentroidIndex |	
+	minDistance := self distanceBetween: aPoint and: (centroids first).
+	nearestCentroidIndex := 1.
+
+	centroids doWithIndex: [ :centroid :i | 
+		| distance |
+		distance := self distanceBetween: aPoint and: centroid.
+		distance < minDistance ifTrue: [ 
+			minDistance := distance.
+			nearestCentroidIndex := i ] ].
+
+	^ nearestCentroidIndex
+]
+
 { #category : #'api - configuration' }
 AIKMeans >> numberOfClusters: anObject [
 
@@ -234,7 +197,7 @@ AIKMeans >> predict: aCollectionOfPoints [
 	| predictions |
 	predictions := OrderedCollection new.
 	1 to: aCollectionOfPoints size do: [ :index | 
-		predictions add: (self clusterNearestToPoint: (aCollectionOfPoints at: index)) ].
+		predictions add: (self nearestCentroidToPoint: (aCollectionOfPoints at: index)) ].
 	^ predictions
 ]
 
@@ -242,46 +205,37 @@ AIKMeans >> predict: aCollectionOfPoints [
 AIKMeans >> run: aCollectionOfPoints [
 
 	| score |
-	self initializeEmptyModel.
-	
+	performedIterations := 0.
+	bestCentroids := OrderedCollection new.
+	bestScore := Float infinity.
 	"Initialize the centrois using the k-means++ algorithm"
 	self initializeCentroidsKMeansPlusPlus: aCollectionOfPoints.
 
-	"We must run it at least twice"
-	2 timesRepeat: [ self step: aCollectionOfPoints ].
-	[ self hasConverged or: [ self hasReachedMaxIterations ] ] whileFalse: [ self step: aCollectionOfPoints ].
+	[
+	self assignClusterToPoints: aCollectionOfPoints.
+	self updateCentroids: aCollectionOfPoints.
+	performedIterations := performedIterations + 1 ] 
+		doWhileFalse: [ self hasConverged or: [ self hasReachedMaxIterations ] ].
 
 	"The best centroid points are the ones that minimize the score.
 	The score is the sum of the mean square errors of the points and its cluster."
 	score := self score: aCollectionOfPoints.
-	bestScore ifNil: [ bestScore := score ].
-	bestCentroids ifNil: [ bestCentroids := centroids copy ].
-	
-	bestScore > score ifTrue: [ 
-		bestCentroids := centroids copy.
+
+	bestScore > score ifTrue: [
+		bestCentroids := centroids.
 		bestScore := score ]
 ]
 
 { #category : #'api - evaluation' }
 AIKMeans >> score: aCollectionOfPoints [
+	"The score is the sum of the mean square errors of the points and its cluster."
 
 	| point centroid distances |
-	distances := (1 to: aCollectionOfPoints size) collect: [ :index | 
+	distances := (1 to: aCollectionOfPoints size) collect: [ :index |
 		point := aCollectionOfPoints at: index.
 		centroid := centroids at: (clusters at: index).
-		
 		self distanceBetween: point and: centroid ].
-	
 	^ distances sum
-]
-
-{ #category : #training }
-AIKMeans >> step: aCollectionOfPoints [
-
-	self assignClusterToPoints: aCollectionOfPoints.
-	self updateCentroids: aCollectionOfPoints.
-	
-	performedIterations := performedIterations + 1
 ]
 
 { #category : #'api - configuration' }
@@ -313,5 +267,5 @@ AIKMeans >> updateCentroids: aCollectionOfPoints [
 
 		pointsOfThisCentroid isEmpty
 			ifTrue: [ self chooseRandomCentroid: aCollectionOfPoints ]
-			ifFalse: [ self calculateAverage: pointsOfThisCentroid ] ]
+			ifFalse: [ pointsOfThisCentroid average ] ]
 ]

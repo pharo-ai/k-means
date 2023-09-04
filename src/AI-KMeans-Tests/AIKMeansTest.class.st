@@ -27,17 +27,6 @@ AIKMeansTest >> testAssignClusterToPoints [
 ]
 
 { #category : #tests }
-AIKMeansTest >> testCalculateAverage [
-
-	| expected points |
-	kMeans numberOfClusters: 2.
-	points := #( #( 1 2 3 ) #( 0 1 1 ) #( 0.5 1 0.5 ) #( 0.5 0.5 0.5 ) ).
-	expected := #( 0.5 1.125 1.25 ).
-
-	self assert: (kMeans calculateAverage: points) equals: expected
-]
-
-{ #category : #tests }
 AIKMeansTest >> testEmptyDataset [
 
 	| data expectedClusters |
