@@ -22,8 +22,37 @@ AIKMeansTest >> testAssignClusterToPoints [
 	kMeans maxIterations: 5.
 	kMeans centroids: #( #( 0.1 0.1 ) #( 0.4 0.4 ) #( 10 10 ) ).
 	kMeans assignClusterToPoints: #( #( 0.1 0.1 ) #( 0.3 0.3 ) #( 9 9 ) ).
-	
+
 	self assertCollection: kMeans clusters hasSameElements: #( 1 2 3 )
+]
+
+{ #category : #tests }
+AIKMeansTest >> testChooseRandomCentroid [
+
+	| points randomCentroids |
+	points := #( #( 0 50 ) #( 10 1000 ) ).
+	"Get 10 random centroids"
+	randomCentroids := (1 to: 10) collect: [ :i |  kMeans chooseRandomCentroid: points ].
+
+	randomCentroids do: [ :randomCentroid |
+		self assert: randomCentroid size equals: 2.
+
+		self assert: randomCentroid first <= 10.
+		self assert: randomCentroid first >= 0.
+
+		self assert: randomCentroid second <= 1000.
+		self assert: randomCentroid second >= 50 ]
+]
+
+{ #category : #tests }
+AIKMeansTest >> testDistanceBetweenAnd [
+
+	self
+		assert: (kMeans distanceBetween: #( 1 1 ) and: #( 2 2 ))
+		closeTo: 2 sqrt. "The distance is two if we follow the euclidean distance"
+	self
+		assert: (kMeans distanceBetween: #( 0 0 ) and: #( 1 1 ))
+		closeTo: 2 sqrt "Euclidean distance"
 ]
 
 { #category : #tests }
@@ -98,8 +127,26 @@ AIKMeansTest >> testInitializeCentroidsKMeansPlusPlus [
 { #category : #tests }
 AIKMeansTest >> testInitializeRandomCentroids [
 
-	kMeans := AIKMeans numberOfClusters: 3.
-	
+	| points |
+	points := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
+	kMeans numberOfClusters: 3.
+	kMeans initializeRandomCentroids: points.
+	self assert: kMeans centroids size equals: 3.
+	self denyCollection: kMeans centroids includesAny: points
+]
+
+{ #category : #tests }
+AIKMeansTest >> testNearestCentroidToPoint [
+
+	| centroids |
+	centroids := #( #( 0 0 ) #( 1 1 ) #( 2 2 ) ).
+	kMeans
+		numberOfClusters: 3;
+		centroids: centroids.
+
+	self assert: (kMeans nearestCentroidToPoint: #( 1.5 1 )) equals: 2.
+	self assert: (kMeans nearestCentroidToPoint: #( 0.5 0.2 )) equals: 1.
+	self assert: (kMeans nearestCentroidToPoint: #( 1.5 1.7 )) equals: 3
 ]
 
 { #category : #tests }
@@ -118,14 +165,26 @@ AIKMeansTest >> testPredict [
 { #category : #tests }
 AIKMeansTest >> testScore [
 
-	| data initCentroids |
-	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
-	initCentroids := #( #( 0 0 ) #( 10 1 ) ).
+	| data initCentroids initClusters expectedScore |
+	data := #( #( 0 0 ) #( 5 2 ) #( 1 2 ) #( 1 1 ) ).
+	initCentroids := #( #( 0 0 ) #( 4 7 ) ).
+	initClusters := #(1 2 1 1).
+	"The score is the sum of the euclidean distance to each point to its cluster (centroid)"
+	expectedScore := 0 + 26 sqrt + 5 sqrt + 2 sqrt.
 
 	kMeans numberOfClusters: 2.
 	kMeans centroids: initCentroids.
-	kMeans assignClusterToPoints: data.
-	self assert: (kMeans score: data) closeTo: 0.5 + 2 sqrt + 1.11803
+	kMeans clusters: initClusters.
+	self assert: (kMeans score: data) closeTo: expectedScore.
+	
+	"Second case"
+	data := #( #( 0 0 ) #( 0.5 0 ) #( 0.5 1 ) #( 1 1 ) ).
+	initCentroids := #( #( 0 0 ) #( 10 1 ) ).
+	initClusters := #(1 1 1 1).
+	kMeans numberOfClusters: 2.
+	kMeans centroids: initCentroids.
+	kMeans clusters: initClusters .
+	self assert: (kMeans score: data) closeTo: 0.25 sqrt + 1.25 sqrt + 2 sqrt
 ]
 
 { #category : #tests }
@@ -149,5 +208,24 @@ AIKMeansTest >> testTransform [
 		numberOfClusters: 2;
 		centroids: #( #( 0 0 ) #( 1 1 ) ).
 
-	self assert: (kMeans transform: points) equals: { { 0. euclideanDistance } . { euclideanDistance . 0 } }
+	self
+		assert: (kMeans transform: points)
+		equals: { { 0. euclideanDistance } . { euclideanDistance . 0 } }
+]
+
+{ #category : #tests }
+AIKMeansTest >> testUpdateCentroids [
+
+	| points initCentroids expectedFirstCentroid expectedSecondCentroid |
+	points := #( #( 0 0 ) #( 1 1 ) #( 2 2 ) #( 6 6 ) #( 5 5 ) ).
+	initCentroids := #( #( 0 0 ) #( 6 6 ) ).
+	expectedFirstCentroid := { #( 0 0 ) . #( 1 1 ) . #( 2 2 ) } average.
+	expectedSecondCentroid := { #( 6 6 ) . #( 5 5 ) } average.
+	kMeans
+		numberOfClusters: 2;
+		clusters: #( 1 1 1 2 2 );
+		centroids: initCentroids.
+	kMeans updateCentroids: points.
+	self denyCollection: kMeans centroids equals: initCentroids.
+	self assertCollection: kMeans centroids equals: { expectedFirstCentroid . expectedSecondCentroid }.
 ]

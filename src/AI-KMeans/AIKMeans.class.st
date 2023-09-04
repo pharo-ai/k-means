@@ -1,7 +1,9 @@
 "
 K-Means is a clustering, unsupervised machine learning algorithm.
 
-Please refer to the Pharo wiki for more information [Pharo wiki](https://github.com/pharo-ai/wiki)
+Please refer to the Pharo wiki for more information [Pharo wiki](https://github.com/pharo-ai/wiki).
+
+We used some comments from [scikitlearn](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html#sklearn.cluster.KMeans.transform) in our code.
 "
 Class {
 	#name : #AIKMeans,
@@ -61,25 +63,34 @@ AIKMeans >> centroids: aCollectionOfPoints [
 
 { #category : #training }
 AIKMeans >> chooseRandomCentroid: aCollectionOfPoints [
+	"Algorithm:
+	
+	- Take the min and max value for each dimension of the point. If the point is a normal X,Y
+	point, take the min and max X value, and the min and max Y value.
+	- Choose a random number between the min and max range for each point dimension. "
 
-	"Choose a random point as centroids"
-
-	| min max pointDimension centroid |
+	| min max pointDimension |
 	pointDimension := aCollectionOfPoints first size.
-	centroid := OrderedCollection new.
-	
-	1 to: pointDimension do: [ :i | 
-		max := aCollectionOfPoints max: [ :point | point at: i ].
-		min := aCollectionOfPoints min: [ :point | point at: i ].
-		centroid add: (rand nextBetween: min and: max) ].
-	
-	^ centroid asArray
+
+	^ (1 to: pointDimension)
+		  collect: [ :i |
+			  max := aCollectionOfPoints max: [ :point | point at: i ].
+			  min := aCollectionOfPoints min: [ :point | point at: i ].
+			  rand nextBetween: min and: max ]
+		  as: Array
 ]
 
 { #category : #accessing }
 AIKMeans >> clusters [
 
 	^ clusters
+]
+
+{ #category : #accessing }
+AIKMeans >> clusters: aCollection [
+	"Used for testing"
+
+	clusters := aCollection
 ]
 
 { #category : #training }
@@ -141,7 +152,7 @@ AIKMeans >> initialize [
 	timesToRun := self class defaultNumberOfTimesItIsRun
 ]
 
-{ #category : #initialization }
+{ #category : #training }
 AIKMeans >> initializeCentroidsKMeansPlusPlus: points [
 
 	" The k-means++ is an algorithm for initializing the centroids. It was proposed in 2007 by Arthur et Vassilvitskii. 
@@ -163,7 +174,7 @@ AIKMeans >> initializeCentroidsKMeansPlusPlus: points [
 		centroids add: pointWithMaxDistance ]
 ]
 
-{ #category : #initialization }
+{ #category : #training }
 AIKMeans >> initializeRandomCentroids: aCollectionOfPoints [
 
 	centroids := (1 to: numberOfClusters) collect: [ :i | 
@@ -184,7 +195,7 @@ AIKMeans >> kMeansAlgorithm: aCollectionOfPoints [
 		doWhileFalse: [ self hasConverged or: [ self hasReachedMaxIterations ] ].
 ]
 
-{ #category : #'api - configuration' }
+{ #category : #accessing }
 AIKMeans >> maxIterations: anInteger [
 
 	maxIterations := anInteger
@@ -207,7 +218,7 @@ AIKMeans >> nearestCentroidToPoint: aPoint [
 	^ nearestCentroidIndex
 ]
 
-{ #category : #'api - configuration' }
+{ #category : #accessing }
 AIKMeans >> numberOfClusters: anObject [
 
 	numberOfClusters := anObject
@@ -215,15 +226,12 @@ AIKMeans >> numberOfClusters: anObject [
 
 { #category : #api }
 AIKMeans >> predict: aCollectionOfPoints [
+	"Asign each point to the closest centroid (in other words, cluster the points)"
 
-	| predictions |
-	predictions := OrderedCollection new.
-	1 to: aCollectionOfPoints size do: [ :index | 
-		predictions add: (self nearestCentroidToPoint: (aCollectionOfPoints at: index)) ].
-	^ predictions
+	^ aCollectionOfPoints collect: [ :point | self nearestCentroidToPoint: point ]
 ]
 
-{ #category : #'api - evaluation' }
+{ #category : #api }
 AIKMeans >> score: aCollectionOfPoints [
 	"The score is the sum of the mean square errors of the points and its cluster."
 
@@ -235,7 +243,7 @@ AIKMeans >> score: aCollectionOfPoints [
 	^ distances sum
 ]
 
-{ #category : #'api - configuration' }
+{ #category : #accessing }
 AIKMeans >> timesToRun: anInteger [
 
 	timesToRun := anInteger
@@ -243,8 +251,10 @@ AIKMeans >> timesToRun: anInteger [
 
 { #category : #api }
 AIKMeans >> transform: aCollectionOfPoints [
+	"Transform X to a cluster-distance space.
+	Compute the distance matrix between each point to each of the centroids"
 
-	^ aCollectionOfPoints collect: [ :aPoint | 
+	^ aCollectionOfPoints collect: [ :aPoint |
 		  centroids collect: [ :aCentroid | self distanceBetween: aPoint and: aCentroid ] ]
 ]
 
