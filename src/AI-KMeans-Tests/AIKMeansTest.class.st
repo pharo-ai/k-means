@@ -105,6 +105,26 @@ AIKMeansTest >> testFourPointsTwoClusters [
 ]
 
 { #category : #tests }
+AIKMeansTest >> testHasConverged [
+
+	| centroids previousCentroids |
+	centroids := #( #( 1 1 ) #( 2 1 ) #( 1 3 ) ).
+	previousCentroids := #( #( 1 1 ) #( 1.9 0.9 ) #( 1 3 ) ).
+
+	kMeans
+		numberOfClusters: 3;
+		centroids: centroids;
+		previousCentroids: previousCentroids.
+	self deny: kMeans hasConverged.
+
+	kMeans
+		numberOfClusters: 3;
+		centroids: centroids;
+		previousCentroids: centroids.
+	self assert: kMeans hasConverged
+]
+
+{ #category : #tests }
 AIKMeansTest >> testInitializeCentroidsKMeansPlusPlus [
 
 	| groupOne groupTwo groupThree points |

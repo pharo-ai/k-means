@@ -245,6 +245,13 @@ AIKMeans >> predict: aCollectionOfPoints [
 	^ aCollectionOfPoints collect: [ :point | self nearestCentroidToPoint: point ]
 ]
 
+{ #category : #accessing }
+AIKMeans >> previousCentroids: aCollection [
+	"Method only used for testing"
+
+	previousCentroids := aCollection
+]
+
 { #category : #api }
 AIKMeans >> score: aCollectionOfPoints [
 	"The score is the sum of the mean square errors of the points and its cluster."
